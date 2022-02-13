@@ -1,0 +1,31 @@
+{
+	"name": "pixelmon",
+	"version": "1.0.0",
+	"description": "Pixelmon Website",
+	"main": "app.js",
+	"type": "module",
+	"scripts": {
+		"test": "npm run test",
+		"server": "nodemon server/app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/IsaiahPetrichor/Pixelmon.git"
+	},
+	"author": "Isaiah Petrichor",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/IsaiahPetrichor/Pixelmon/issues"
+	},
+	"homepage": "https://github.com/IsaiahPetrichor/Pixelmon#readme",
+	"devDependencies": {
+		"nodemon": "^2.0.15"
+	},
+	"dependencies": {
+		"body-parser": "^1.19.1",
+		"errorhandler": "^1.5.1",
+		"express": "^4.17.2",
+		"pg": "^8.7.3",
+		"pg-format": "^1.0.4"
+	}
+}
