@@ -1,5 +1,4 @@
-# Pixelmon Website
+# Elysium Pixelmon
 
-Alpha Website and Server
-
-Node, Express, Postgres backend
+React
+ASP.NET

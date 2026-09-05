@@ -1,0 +1,6 @@
+@Pixelmon.Api_HostAddress = http://localhost:5172
+
+GET {{Pixelmon.Api_HostAddress}}/kantostatus/
+Accept: application/json
+
+###
