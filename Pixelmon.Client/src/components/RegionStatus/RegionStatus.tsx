@@ -1,12 +1,22 @@
-import { use } from 'react';
+import { useEffect, useState } from 'react';
 import type { RegionStatus } from './RegionStatus.types';
 
-const statusPromise = fetch(`http://localhost:5172/KantoStatus`).then((res) => res.json());
+function RegionStatusComponent({ regionId }: { regionId: string }) {
+  const [status, setStatus] = useState<RegionStatus>();
 
-function StatusComponent() {
-  const status: RegionStatus = use(statusPromise);
+  useEffect(() => {
+    const response: Promise<RegionStatus> = fetch(`http://localhost:5172/RegionStatus/GetKantoStatus`).then((res) => {
+      return res.json();
+    });
 
-  return <div>Current Kanto status is: {status.message}</div>;
+    response.then((data) => setStatus(data));
+  }, [regionId]);
+
+  return (
+    <div>
+      Current {status?.regionName} status is: {status?.message}
+    </div>
+  );
 }
 
-export default StatusComponent;
+export default RegionStatusComponent;

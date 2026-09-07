@@ -1,0 +1,118 @@
+main {
+  width: 100%;
+  background-color: rgba(20, 20, 20, 0.4);
+  margin: 0 auto;
+}
+
+.flex {
+  display: flex;
+  justify-content: center;
+  align-content: space-around;
+  flex-wrap: wrap;
+}
+
+body {
+  position: relative;
+  z-index: 1;
+  background-color: rgb(20, 35, 70);
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-image: url('../public/resources/images/Route6.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  mask-image: radial-gradient(circle, black 10%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle, black 10%, transparent 90%);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  flex-wrap: nowrap;
+  padding: 0 4dvw;
+  background-color: rgb(20, 20, 20);
+}
+
+header h1 {
+  width: 20%;
+  text-align: left;
+}
+
+nav {
+  width: 80%;
+  padding: 0 3rem;
+}
+
+nav ul {
+  display: flex;
+  justify-content: end;
+  list-style-type: none;
+}
+
+nav li {
+  margin: 0 1rem;
+  padding: 4px;
+  border-radius: 2px;
+}
+
+ul a {
+  font-family: var(--sans);
+  font-size: 1rem;
+  text-decoration: none;
+  text-align: center;
+  color: var(--text);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+nav a:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+}
+
+footer {
+  background-color: rgb(20, 20, 20);
+  padding: 20px auto;
+  font-size: 1rem;
+}
+
+@media (max-width: 650px) {
+  header {
+    flex-wrap: wrap;
+    text-wrap: nowrap;
+  }
+
+  header h1 {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  header ul {
+    margin: 4px 0;
+    padding: 0;
+    flex-wrap: wrap;
+    justify-content: start;
+  }
+
+  header ul li {
+    margin: 0 1rem 0 0;
+    padding: 0;
+  }
+
+  header ul li::before {
+    content: '\2022';
+    color: var(--text);
+  }
+
+  nav {
+    padding: 0;
+  }
+}
