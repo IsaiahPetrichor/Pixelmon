@@ -1,5 +1,6 @@
 .ENV
 node_modules
+SetEnv.cmd
 
 # Logs
 logs
