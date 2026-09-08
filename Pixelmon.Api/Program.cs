@@ -1,11 +1,23 @@
 using Npgsql;
+using Microsoft.OpenApi.Models;
+using Pixelmon.Api.Middleware;
 using Pixelmon.Api.Services;
+using Pixelmon.Api.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+if (string.IsNullOrWhiteSpace(builder.Configuration["AdminAccess:Username"]) ||
+    string.IsNullOrWhiteSpace(builder.Configuration["AdminAccess:ApiKey"]))
+{
+    throw new InvalidOperationException(
+        "Admin access is not configured. Set AdminAccess:Username and AdminAccess:ApiKey.");
+}
+
+builder.Services.AddSingleton<AdminTokenService>();
 
 var databaseConnectionString = builder.Configuration.GetConnectionString("PixelmonDatabase")
     ?? throw new InvalidOperationException(
@@ -16,7 +28,19 @@ builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "Admin token",
+        In = ParameterLocation.Header,
+        Description = "Enter the token returned by POST /AdminAuth/verify."
+    });
+    options.OperationFilter<AdminAuthorizationOperationFilter>();
+});
 
 builder.Services.AddCors(options =>
 {
@@ -40,6 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<AdminAuthorizationMiddleware>();
 
 app.UseAuthorization();
 

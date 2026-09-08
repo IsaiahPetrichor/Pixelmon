@@ -1,7 +1,8 @@
 import './App.css';
-import Home from './pages/Home/Home';
 import { Route, Routes } from 'react-router';
+import Home from './pages/Home/Home';
 import Regions from './pages/Regions/Regions';
+import Admin from './pages/Admin/Admin';
 
 function App() {
   return (
@@ -16,6 +17,9 @@ function App() {
             <li>
               <a href="/regions">Region Progress</a>
             </li>
+            <li>
+              <a href="/admin">Admin</a>
+            </li>
           </ul>
         </nav>
       </header>
@@ -23,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/regions" element={<Regions />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
       <footer>
