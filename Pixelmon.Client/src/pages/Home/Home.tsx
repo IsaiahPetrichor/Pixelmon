@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import './Home.css';
 
 type RegionStatuses = {
-  kanto: number;
-  hoenn: number;
-  sinnoh: number;
+  Kanto: number;
+  Hoenn: number;
+  Sinnoh: number;
 };
 
 function Home() {
@@ -18,9 +18,9 @@ function Home() {
     });
 
     response.then((data) => {
-      setKantoProgress(data.kanto);
-      setHoennProgress(data.hoenn);
-      setSinnohProgress(data.sinnoh);
+      setKantoProgress(data.Kanto);
+      setHoennProgress(data.Hoenn);
+      setSinnohProgress(data.Sinnoh);
     });
   }, []);
 
@@ -48,7 +48,7 @@ function Home() {
               <div
                 className="progress"
                 style={{
-                  backgroundImage: `linear-gradient(to right, rgb(161, 1, 1) ${kantoProgress}%, rgb(199, 199, 199) ${kantoProgress ? kantoProgress + 2 : '...'}%)`,
+                  backgroundImage: `linear-gradient(to right, rgb(161, 1, 1) ${kantoProgress}%, rgb(199, 199, 199) ${kantoProgress ? kantoProgress + 2 : 0}%)`,
                 }}
               ></div>
               <p>{kantoProgress ?? '...'}% Complete</p>
