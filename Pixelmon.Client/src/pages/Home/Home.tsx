@@ -13,6 +13,7 @@ function Home() {
   const [sinnohProgress, setSinnohProgress] = useState(0);
 
   const apiBaseUrl = import.meta.env.VITE_API_URL;
+  const assetBaseUrl = import.meta.env.BASE_URL;
   // const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
   useEffect(() => {
@@ -58,12 +59,12 @@ function Home() {
             </div>
           </div>
           <div className="regionPreview kantoPreview">
-            <img src="/resources/images/MtEmber.png" alt="Kanto" />
+            <img src={`${assetBaseUrl}resources/images/MtEmber.png`} alt="Kanto" />
           </div>
         </div>
         <div className="regionContainer hoenn">
           <div className="regionPreview hoennPreview">
-            <img src="/resources/images/Hoenn.png" alt="Hoenn" />
+            <img src={`${assetBaseUrl}resources/images/Hoenn.png`} alt="Hoenn" />
           </div>
           <div>
             <h3>Hoenn</h3>
@@ -94,7 +95,7 @@ function Home() {
             </div>
           </div>
           <div className="regionPreview sinnohPreview">
-            <img src="/resources/images/Sinnoh.png" alt="Sinnoh" />
+            <img src={`${assetBaseUrl}resources/images/Sinnoh.png`} alt="Sinnoh" />
           </div>
         </div>
         <p>

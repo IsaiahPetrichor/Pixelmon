@@ -24,7 +24,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
 
-  background-image: url('/resources/images/Route6.png');
+  background-image: url('../public/resources/images/Route6.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
