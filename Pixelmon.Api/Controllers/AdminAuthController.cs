@@ -32,6 +32,43 @@ public class AdminAuthController(
             : Unauthorized(new { authorized = false, message = "Invalid username or password." });
     }
 
+    [HttpPost("signup")]
+    public async Task<IActionResult> SignUp(SignUpRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Username) || request.Password.Length < 8)
+        {
+            return BadRequest(new { message = "Username is required and password must be at least 8 characters." });
+        }
+
+        var normalizedUsername = request.Username.Trim();
+        var user = new User
+        {
+            Id = 0,
+            Username = normalizedUsername,
+            RankId = 0,
+            CreatedAt = DateTime.UtcNow
+        };
+        var passwordHash = passwordHasher.HashPassword(user, request.Password);
+
+        try
+        {
+            var created = await databaseService.CreateBaseUser(normalizedUsername, passwordHash, cancellationToken);
+            if (!created)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "The base user rank is not configured." });
+            }
+        }
+        catch (Npgsql.PostgresException exception) when (exception.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation)
+        {
+            return Conflict(new { message = "That username is already in use." });
+        }
+
+        var authenticatedUser = await databaseService.QueryUserForAuthentication(normalizedUsername, cancellationToken);
+        return authenticatedUser is null
+            ? StatusCode(StatusCodes.Status500InternalServerError)
+            : Ok(new { authorized = true, token = tokenService.CreateToken(authenticatedUser) });
+    }
+
     [HttpGet("validate")]
     public IActionResult Validate()
     {
@@ -49,3 +86,5 @@ public class AdminAuthController(
 }
 
 public sealed record AdminCredentials(string Username, string Password);
+
+public sealed record SignUpRequest(string Username, string Password);

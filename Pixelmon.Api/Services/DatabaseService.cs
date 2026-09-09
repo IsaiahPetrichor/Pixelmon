@@ -25,6 +25,8 @@ public interface IDatabaseService
 
     Task<AuthenticatedUser?> QueryUserForAuthentication(string username, CancellationToken cancellationToken = default);
 
+    Task<bool> CreateBaseUser(string username, string passwordHash, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<WorkItemStatus>> QueryWorkItemStatuses(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<WorkItem>> QueryWorkItems(CancellationToken cancellationToken = default);
@@ -172,6 +174,24 @@ public sealed class DatabaseService(NpgsqlDataSource dataSource) : IDatabaseServ
             cancellationToken);
 
         return users.SingleOrDefault();
+    }
+
+    public async Task<bool> CreateBaseUser(
+        string username,
+        string passwordHash,
+        CancellationToken cancellationToken = default)
+    {
+        await using var command = dataSource.CreateCommand(
+            @"INSERT INTO users (username, password_hash, rank_id)
+              SELECT $1, $2, id
+              FROM staffranks
+              WHERE rank_name = 'User'
+              RETURNING id");
+        command.Parameters.Add(new NpgsqlParameter { Value = username });
+        command.Parameters.Add(new NpgsqlParameter { Value = passwordHash });
+
+        var createdUserId = await command.ExecuteScalarAsync(cancellationToken);
+        return createdUserId is not null;
     }
 
     public async Task<IReadOnlyList<WorkItemStatus>> QueryWorkItemStatuses(CancellationToken cancellationToken = default)
