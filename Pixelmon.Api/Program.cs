@@ -51,7 +51,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 
-    options.addPolicy("ProdPolicy", policy =>
+    options.AddPolicy("ProdPolicy", policy =>
     {
         policy.WithOrigins("https://isaiahpetrichor.github.io/")
             .AllowAnyMethod()
