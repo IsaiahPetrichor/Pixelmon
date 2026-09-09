@@ -5,7 +5,6 @@ namespace Pixelmon.Api.Middleware;
 
 public sealed class AdminAuthorizationMiddleware(
     RequestDelegate next,
-    IConfiguration configuration,
     AdminTokenService tokenService)
 {
     public async Task InvokeAsync(HttpContext context)
@@ -17,12 +16,20 @@ public sealed class AdminAuthorizationMiddleware(
                 ? token["Bearer ".Length..].Trim()
                 : null;
 
-            var configuredUsername = configuration["AdminAccess:Username"] ?? string.Empty;
-            if (!tokenService.IsValid(token, configuredUsername))
+            if (!tokenService.IsValid(token, out var authToken))
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;
             }
+
+            var protectedRoute = context.GetEndpoint()!.Metadata.GetMetadata<AdminProtectedAttribute>()!;
+            if (authToken!.PermissionLevel > protectedRoute.MinimumPermissionLevel)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return;
+            }
+
+            context.Items[nameof(AuthToken)] = authToken;
         }
 
         await next(context);

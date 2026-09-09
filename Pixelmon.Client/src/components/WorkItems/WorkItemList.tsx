@@ -98,7 +98,7 @@ function WorkItemList() {
       setWorkAreas(data);
     });
 
-    const staffResponse = fetch(`${apiUrl}/DatabaseTest/GetStaff`, {
+    const staffResponse = fetch(`${apiUrl}/DatabaseTest/GetUsers`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((response) => {
       if (!response.ok) throw new Error();

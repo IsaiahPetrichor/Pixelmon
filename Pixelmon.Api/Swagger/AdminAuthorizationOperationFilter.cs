@@ -28,6 +28,7 @@ public sealed class AdminAuthorizationOperationFilter : IOperationFilter
             }] = []
         });
 
-        operation.Responses.TryAdd("401", new OpenApiResponse { Description = "A valid admin bearer token is required." });
+        operation.Responses.TryAdd("401", new OpenApiResponse { Description = "A valid user bearer token is required." });
+        operation.Responses.TryAdd("403", new OpenApiResponse { Description = "The user rank does not have sufficient permission." });
     }
 }

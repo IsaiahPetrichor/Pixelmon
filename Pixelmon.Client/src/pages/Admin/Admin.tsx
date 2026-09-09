@@ -7,7 +7,7 @@ const adminTokenStorageKey = 'adminToken';
 
 function Admin() {
   const [username, setUsername] = useState('');
-  const [apiKey, setApiKey] = useState('');
+  const [password, setPassword] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(() => Boolean(sessionStorage.getItem(adminTokenStorageKey)));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,18 +32,18 @@ function Admin() {
       const response = await fetch(`${apiBaseUrl}/AdminAuth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, apiKey }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
-        throw new Error('Invalid username or API key.');
+        throw new Error('Invalid username or password.');
       }
 
       const result: { token: string } = await response.json();
       sessionStorage.setItem(adminTokenStorageKey, result.token);
       setIsAuthorized(true);
       setUsername('');
-      setApiKey('');
+      setPassword('');
     } catch {
       setError('Unable to verify those credentials. Check them and try again.');
     } finally {
@@ -103,14 +103,14 @@ function Admin() {
           onChange={(event) => setUsername(event.target.value)}
           required
         />
-        <label htmlFor="admin-api-key">API key</label>
+        <label htmlFor="admin-password">Password</label>
         <input
-          id="admin-api-key"
-          name="apiKey"
+          id="admin-password"
+          name="password"
           type="password"
-          autoComplete="off"
-          value={apiKey}
-          onChange={(event) => setApiKey(event.target.value)}
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
           required
         />
         {error && (

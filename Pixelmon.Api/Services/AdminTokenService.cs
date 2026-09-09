@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Pixelmon.Api.Models;
 
 namespace Pixelmon.Api.Services;
 
@@ -9,9 +10,13 @@ public sealed class AdminTokenService(IConfiguration configuration)
     private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(1);
     private readonly byte[] _signingKey = Encoding.UTF8.GetBytes(configuration["AdminAccess:ApiKey"] ?? string.Empty);
 
-    public string CreateToken(string username)
+    public string CreateToken(AuthenticatedUser user)
     {
-        var payload = new AdminTokenPayload(username, DateTimeOffset.UtcNow.Add(TokenLifetime).ToUnixTimeSeconds());
+        var payload = new AdminTokenPayload(
+            user.Id,
+            user.Username,
+            user.PermissionLevel,
+            DateTimeOffset.UtcNow.Add(TokenLifetime).ToUnixTimeSeconds());
         var payloadBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload));
         var encodedPayload = Base64UrlEncode(payloadBytes);
         var signature = Sign(encodedPayload);
@@ -19,8 +24,9 @@ public sealed class AdminTokenService(IConfiguration configuration)
         return $"{encodedPayload}.{signature}";
     }
 
-    public bool IsValid(string? token, string configuredUsername)
+    public bool IsValid(string? token, out AuthToken? authToken)
     {
+        authToken = null;
         if (string.IsNullOrWhiteSpace(token)) return false;
 
         var tokenParts = token.Split('.', 2);
@@ -39,9 +45,10 @@ public sealed class AdminTokenService(IConfiguration configuration)
         try
         {
             var payload = JsonSerializer.Deserialize<AdminTokenPayload>(Base64UrlDecode(tokenParts[0]));
-            return payload is not null &&
-                FixedTimeEquals(payload.Username, configuredUsername) &&
-                payload.ExpiresAt > DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (payload is null || payload.ExpiresAt <= DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return false;
+
+            authToken = new AuthToken(payload.UserId, payload.Username, payload.PermissionLevel);
+            return true;
         }
         catch (FormatException)
         {
@@ -58,15 +65,6 @@ public sealed class AdminTokenService(IConfiguration configuration)
         return Base64UrlEncode(HMACSHA256.HashData(_signingKey, Encoding.UTF8.GetBytes(value)));
     }
 
-    private static bool FixedTimeEquals(string providedValue, string configuredValue)
-    {
-        var providedBytes = Encoding.UTF8.GetBytes(providedValue);
-        var configuredBytes = Encoding.UTF8.GetBytes(configuredValue);
-
-        return providedBytes.Length == configuredBytes.Length &&
-            CryptographicOperations.FixedTimeEquals(providedBytes, configuredBytes);
-    }
-
     private static string Base64UrlEncode(byte[] bytes)
     {
         return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
@@ -79,5 +77,7 @@ public sealed class AdminTokenService(IConfiguration configuration)
         return Convert.FromBase64String(paddedValue);
     }
 
-    private sealed record AdminTokenPayload(string Username, long ExpiresAt);
+    private sealed record AdminTokenPayload(int UserId, string Username, int PermissionLevel, long ExpiresAt);
 }
+
+public sealed record AuthToken(int UserId, string Username, int PermissionLevel);

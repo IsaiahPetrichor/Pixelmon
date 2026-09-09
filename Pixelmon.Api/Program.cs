@@ -1,4 +1,6 @@
 using Npgsql;
+using Microsoft.AspNetCore.Identity;
+using Pixelmon.Api.Models;
 using Microsoft.OpenApi.Models;
 using Pixelmon.Api.Middleware;
 using Pixelmon.Api.Services;
@@ -10,14 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-if (string.IsNullOrWhiteSpace(builder.Configuration["AdminAccess:Username"]) ||
-    string.IsNullOrWhiteSpace(builder.Configuration["AdminAccess:ApiKey"]))
-{
-    throw new InvalidOperationException(
-        "Admin access is not configured. Set AdminAccess:Username and AdminAccess:ApiKey.");
-}
-
 builder.Services.AddSingleton<AdminTokenService>();
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var databaseConnectionString = builder.Configuration.GetConnectionString("PixelmonDatabase")
     ?? throw new InvalidOperationException(

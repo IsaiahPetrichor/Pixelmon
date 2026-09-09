@@ -54,15 +54,15 @@ public class DatabaseTestController(
         return Ok(staffRanks);
     }
 
-    [AdminProtected]
-    [HttpGet("GetStaff")]
-    public async Task<IActionResult> GetStaff(CancellationToken cancellationToken)
+    [AdminProtected(minimumPermissionLevel: 2)]
+    [HttpGet("GetUsers")]
+    public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[GetStaff] called. returning all staff.");
+        _logger.LogInformation("[GetUsers] called. returning all users.");
 
-        var staff = await _databaseService.QueryStaff(cancellationToken);
+        var users = await _databaseService.QueryUsers(cancellationToken);
 
-        return Ok(staff);
+        return Ok(users);
     }
 
     [AdminProtected]

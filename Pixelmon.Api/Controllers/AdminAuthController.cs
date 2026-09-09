@@ -1,32 +1,35 @@
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Pixelmon.Api.Models;
 using Pixelmon.Api.Services;
 
 namespace Pixelmon.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AdminAuthController(IConfiguration configuration, AdminTokenService tokenService, ILogger<AdminAuthController> logger) : ControllerBase
+public class AdminAuthController(
+    IDatabaseService databaseService,
+    AdminTokenService tokenService,
+    IPasswordHasher<User> passwordHasher,
+    ILogger<AdminAuthController> logger) : ControllerBase
 {
     private readonly ILogger<AdminAuthController> _logger = logger;
 
     [HttpPost("verify")]
-    public IActionResult Verify(AdminCredentials credentials)
+    public async Task<IActionResult> Verify(AdminCredentials credentials, CancellationToken cancellationToken)
     {
-        var configuredUsername = configuration["AdminAccess:Username"] ?? string.Empty;
-        var configuredApiKey = configuration["AdminAccess:ApiKey"] ?? string.Empty;
+        var user = await databaseService.QueryUserForAuthentication(credentials.Username, cancellationToken);
+        var passwordValid = user is not null &&
+            passwordHasher.VerifyHashedPassword(
+                new User { Id = user.Id, Username = user.Username, RankId = 0, CreatedAt = default },
+                user.PasswordHash,
+                credentials.Password) != PasswordVerificationResult.Failed;
 
-        var usernameMatches = FixedTimeEquals(credentials.Username, configuredUsername);
-        var apiKeyMatches = FixedTimeEquals(credentials.ApiKey, configuredApiKey);
+        _logger.LogInformation("[AdminAuth/Verify] called, user is {AuthStatus}.", passwordValid ? "authorized" : "unauthorized");
 
-        var authStatus = usernameMatches && apiKeyMatches;
-
-        _logger.LogInformation($"[AdminAuth/Verify] called, user is {(authStatus ? "authorized" : "unauthorized")}.");
-
-        return authStatus
-            ? Ok(new { authorized = true, token = tokenService.CreateToken(credentials.Username) })
-            : Unauthorized(new { authorized = false, message = "Invalid username or API key." });
+        return passwordValid
+            ? Ok(new { authorized = true, token = tokenService.CreateToken(user!) })
+            : Unauthorized(new { authorized = false, message = "Invalid username or password." });
     }
 
     [HttpGet("validate")]
@@ -36,23 +39,13 @@ public class AdminAuthController(IConfiguration configuration, AdminTokenService
         var token = authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
             ? authorization["Bearer ".Length..].Trim()
             : null;
-        var configuredUsername = configuration["AdminAccess:Username"] ?? string.Empty;
+        var isValid = tokenService.IsValid(token, out var authToken);
+        _logger.LogInformation("[AdminAuth/Validate] called, user is {AuthStatus}.", isValid ? "valid" : "invalid");
 
-        _logger.LogInformation($"[AdminAuth/Validate] called, user is {(tokenService.IsValid(token, configuredUsername) ? "valid" : "invalid")}.");
-
-        return tokenService.IsValid(token, configuredUsername)
-            ? Ok(new { authorized = true })
+        return isValid
+            ? Ok(new { authorized = true, user = authToken })
             : Unauthorized(new { authorized = false });
-    }
-
-    private static bool FixedTimeEquals(string providedValue, string configuredValue)
-    {
-        var providedBytes = Encoding.UTF8.GetBytes(providedValue);
-        var configuredBytes = Encoding.UTF8.GetBytes(configuredValue);
-
-        return providedBytes.Length == configuredBytes.Length &&
-            CryptographicOperations.FixedTimeEquals(providedBytes, configuredBytes);
     }
 }
 
-public sealed record AdminCredentials(string Username, string ApiKey);
+public sealed record AdminCredentials(string Username, string Password);

@@ -21,7 +21,9 @@ public interface IDatabaseService
 
     Task<IReadOnlyList<StaffRank>> QueryStaffRanks(CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Staff>> QueryStaff(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<User>> QueryUsers(CancellationToken cancellationToken = default);
+
+    Task<AuthenticatedUser?> QueryUserForAuthentication(string username, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<WorkItemStatus>> QueryWorkItemStatuses(CancellationToken cancellationToken = default);
 
@@ -135,19 +137,41 @@ public sealed class DatabaseService(NpgsqlDataSource dataSource) : IDatabaseServ
         return staffRanks;
     }
 
-    public async Task<IReadOnlyList<Staff>> QueryStaff(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<User>> QueryUsers(CancellationToken cancellationToken = default)
     {
-        var staff = await QueryAsync(
-            "SELECT id, username, rank_id FROM staff",
-            reader => new Staff
+        var user = await QueryAsync(
+            "SELECT id, username, rank_id, created_at FROM users",
+            reader => new User
             {
                 Id = reader.GetInt32(0),
                 Username = reader.GetString(1),
-                RankId = reader.GetInt32(2)
+                RankId = reader.GetInt32(2),
+                CreatedAt = reader.GetDateTime(3)
             },
             cancellationToken: cancellationToken);
 
-        return staff;
+        return user;
+    }
+
+    public async Task<AuthenticatedUser?> QueryUserForAuthentication(
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        var users = await QueryAsync(
+            @"SELECT users.id, users.username, users.password_hash, staffranks.permission_level
+              FROM users
+              INNER JOIN staffranks ON staffranks.id = users.rank_id
+              WHERE users.username = $1
+              LIMIT 1",
+            reader => new AuthenticatedUser(
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetInt32(3)),
+            [new NpgsqlParameter { Value = username }],
+            cancellationToken);
+
+        return users.SingleOrDefault();
     }
 
     public async Task<IReadOnlyList<WorkItemStatus>> QueryWorkItemStatuses(CancellationToken cancellationToken = default)
