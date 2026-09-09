@@ -1,0 +1,100 @@
+.work-item-list-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.work-item-list {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: left;
+  overflow-x: auto;
+}
+
+.work-item-list th,
+.work-item-list td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid rgba(208, 207, 209, 0.2);
+  vertical-align: top;
+}
+
+.work-item-list th {
+  color: #fff;
+  background: rgba(151, 6, 6, 0.65);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.work-item-list tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.work-item-list tbody tr:hover {
+  background: rgba(151, 6, 6, 0.18);
+}
+
+.work-item-list tbody tr[role='button'] {
+  cursor: pointer;
+}
+
+.work-item-list tbody tr[role='button']:focus-visible {
+  outline: 2px solid #e08a8a;
+  outline-offset: -2px;
+}
+
+.work-item-list td:nth-child(4) {
+  color: #e08a8a;
+  font-weight: 600;
+}
+
+.work-item-list th:last-child,
+.work-item-list td:last-child {
+  width: 5rem;
+  text-align: right;
+}
+
+.delete-work-item-button {
+  padding: 0.1rem 0.25rem;
+  border: 1px solid rgba(255, 170, 170, 0.55);
+  border-radius: 2px;
+  color: #ffaaaa;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.delete-work-item-button:hover {
+  color: #fff;
+  background: rgba(151, 6, 6, 0.75);
+}
+
+.popover-close-button {
+  padding: 0;
+  border: 1px solid rgba(208, 207, 209, 0.45);
+  border-radius: 2px;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.popover-close-button:hover {
+  border-color: #e08a8a;
+  color: #fff;
+}
+
+.work-item-list td {
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.work-item-list tbody tr:only-child td[colspan] {
+  color: rgba(208, 207, 209, 0.75);
+  font-style: italic;
+  text-align: center;
+}

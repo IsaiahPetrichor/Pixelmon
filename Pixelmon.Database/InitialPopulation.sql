@@ -5,7 +5,7 @@ INSERT INTO staffranks (rank_name, permission_level)
 VALUES ('Owner', 1), ('Admin', 2), ('Moderator', 3);
 
 INSERT INTO staff (username, rank_id)
-VALUES ('Fallen', 1), ('Zyrex', 1);
+VALUES ('Fallen', 1), ('Zyrex', 1), ('Unassigned', 3);
 
 INSERT INTO workareas (area_name)
 VALUES ('Terrain'),

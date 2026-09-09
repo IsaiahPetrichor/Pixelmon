@@ -1,5 +1,6 @@
 import { useEffect, useState, type SubmitEvent } from 'react';
 import './Admin.css';
+import WorkItemList from '../../components/WorkItems/WorkItemList';
 
 const apiBaseUrl = 'http://localhost:5172';
 const adminTokenStorageKey = 'adminToken';
@@ -77,8 +78,8 @@ function Admin() {
           </button>
         </div>
         <div className="admin-placeholder">
-          <h3>Admin tools</h3>
-          <p>Management tools will appear here as they are added.</p>
+          <h3>Work items</h3>
+          <WorkItemList />
         </div>
       </section>
     );

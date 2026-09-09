@@ -22,7 +22,7 @@ public class AdminAuthController(IConfiguration configuration, AdminTokenService
 
         var authStatus = usernameMatches && apiKeyMatches;
 
-        _logger.LogInformation($"[AdminAuth/verify] called, user is {(authStatus ? "authorized" : "unauthorized")}.");
+        _logger.LogInformation($"[AdminAuth/Verify] called, user is {(authStatus ? "authorized" : "unauthorized")}.");
 
         return authStatus
             ? Ok(new { authorized = true, token = tokenService.CreateToken(credentials.Username) })
@@ -38,7 +38,7 @@ public class AdminAuthController(IConfiguration configuration, AdminTokenService
             : null;
         var configuredUsername = configuration["AdminAccess:Username"] ?? string.Empty;
 
-        _logger.LogInformation($"[AdminAuth/verify] called, user is {(tokenService.IsValid(token, configuredUsername) ? "valid" : "invalid")}.");
+        _logger.LogInformation($"[AdminAuth/Validate] called, user is {(tokenService.IsValid(token, configuredUsername) ? "valid" : "invalid")}.");
 
         return tokenService.IsValid(token, configuredUsername)
             ? Ok(new { authorized = true })

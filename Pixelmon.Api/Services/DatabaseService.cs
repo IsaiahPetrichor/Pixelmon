@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using Pixelmon.Api.Models;
 
@@ -24,6 +26,12 @@ public interface IDatabaseService
     Task<IReadOnlyList<WorkItemStatus>> QueryWorkItemStatuses(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<WorkItem>> QueryWorkItems(CancellationToken cancellationToken = default);
+
+    Task<bool> CreateWorkItem(WorkItemRequest workItem, CancellationToken cancellationToken = default);
+
+    Task<bool> UpdateWorkItem(int id, WorkItemRequest workItem, CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteWorkItem(int id, CancellationToken cancellationToken = default);
 }
 
 public sealed class DatabaseService(NpgsqlDataSource dataSource) : IDatabaseService
@@ -50,6 +58,23 @@ public sealed class DatabaseService(NpgsqlDataSource dataSource) : IDatabaseServ
         }
 
         return results;
+    }
+
+    public async Task<int> CreateAsync<T>(
+       string sql,
+       IEnumerable<NpgsqlParameter>? parameters = null,
+       CancellationToken cancellationToken = default)
+    {
+        await using var command = dataSource.CreateCommand(sql);
+
+        if (parameters is not null)
+        {
+            command.Parameters.AddRange(parameters.ToArray());
+        }
+
+        int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
+
+        return rowsAffected;
     }
 
     public async Task<IReadOnlyList<PokemonRegion>> QueryRegions(CancellationToken cancellationToken = default)
@@ -157,5 +182,56 @@ public sealed class DatabaseService(NpgsqlDataSource dataSource) : IDatabaseServ
             cancellationToken: cancellationToken);
 
         return workItems;
+    }
+
+    public async Task<bool> CreateWorkItem(WorkItemRequest workitem, CancellationToken cancellationToken = default)
+    {
+        var numberCreated = await CreateAsync<WorkItem>(
+            @"INSERT INTO workitems (region_id, route_id, assigned_to_id, work_area_id, status_id, short_description, long_description)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            [
+                new NpgsqlParameter { Value = workitem.RegionId },
+                new NpgsqlParameter { Value = workitem.RouteId },
+                new NpgsqlParameter { Value = workitem.AssignedToId },
+                new NpgsqlParameter { Value = workitem.WorkAreaId },
+                new NpgsqlParameter { Value = workitem.StatusId },
+                new NpgsqlParameter { Value = workitem.ShortDescription },
+                new NpgsqlParameter { Value = workitem.LongDescription }
+            ],
+            cancellationToken: cancellationToken);
+
+        return numberCreated > 0;
+    }
+
+    public async Task<bool> UpdateWorkItem(int id, WorkItemRequest workitem, CancellationToken cancellationToken = default)
+    {
+        var numberUpdated = await CreateAsync<WorkItem>(
+            @"UPDATE workitems
+                SET region_id = $1, route_id = $2, assigned_to_id = $3, work_area_id = $4,
+                    status_id = $5, short_description = $6, long_description = $7
+                WHERE id = $8",
+            [
+                new NpgsqlParameter { Value = workitem.RegionId },
+                new NpgsqlParameter { Value = workitem.RouteId },
+                new NpgsqlParameter { Value = workitem.AssignedToId },
+                new NpgsqlParameter { Value = workitem.WorkAreaId },
+                new NpgsqlParameter { Value = workitem.StatusId },
+                new NpgsqlParameter { Value = workitem.ShortDescription },
+                new NpgsqlParameter { Value = (object?)workitem.LongDescription ?? DBNull.Value },
+                new NpgsqlParameter { Value = id }
+            ],
+            cancellationToken: cancellationToken);
+
+        return numberUpdated > 0;
+    }
+
+    public async Task<bool> DeleteWorkItem(int id, CancellationToken cancellationToken = default)
+    {
+        var numberDeleted = await CreateAsync<WorkItem>(
+            "DELETE FROM workitems WHERE id = $1",
+            [new NpgsqlParameter { Value = id }],
+            cancellationToken: cancellationToken);
+
+        return numberDeleted > 0;
     }
 }

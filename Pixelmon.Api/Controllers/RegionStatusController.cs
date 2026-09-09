@@ -65,7 +65,7 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
             regionCompletion = allRoutes.Count > 0
                 ? allRoutes.Values.Average()
                 : 0.00;
-            allRegions[region.RegionName] = Math.Round(regionCompletion * 100);
+            allRegions[region.RegionName] = Math.Floor(regionCompletion * 100);
         }
         // return the final completion for each region
         return Ok(allRegions);

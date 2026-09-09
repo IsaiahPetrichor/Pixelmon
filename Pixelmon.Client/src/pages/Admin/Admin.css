@@ -93,6 +93,7 @@
   margin-top: 2rem;
   padding: 1.25rem;
   border: 1px dashed rgba(208, 207, 209, 0.45);
+  overflow-x: auto;
 }
 
 .admin-placeholder h3 {
@@ -111,5 +112,15 @@
 
   .secondary-button {
     margin-top: 1rem;
+  }
+
+  .work-item-form {
+    grid-template-columns: 1fr;
+  }
+
+  .work-item-form-wide,
+  .work-item-form-actions,
+  .work-item-form .admin-error {
+    grid-column: auto;
   }
 }

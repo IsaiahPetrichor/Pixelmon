@@ -3,10 +3,11 @@ import { Route, Routes } from 'react-router';
 import Home from './pages/Home/Home';
 import Regions from './pages/Regions/Regions';
 import Admin from './pages/Admin/Admin';
+import { IconContext } from 'react-icons';
 
 function App() {
   return (
-    <>
+    <IconContext.Provider value={{ style: { verticalAlign: 'middle' } }}>
       <header>
         <h1>Pixelmon</h1>
         <nav>
@@ -33,7 +34,7 @@ function App() {
       <footer>
         <p>Contact us on Discord: uhhh, add link to a discord here</p>
       </footer>
-    </>
+    </IconContext.Provider>
   );
 }
 

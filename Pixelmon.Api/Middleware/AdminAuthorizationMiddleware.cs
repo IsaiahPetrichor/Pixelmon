@@ -1,3 +1,4 @@
+using Pixelmon.Api.Attributes;
 using Pixelmon.Api.Services;
 
 namespace Pixelmon.Api.Middleware;
@@ -9,7 +10,7 @@ public sealed class AdminAuthorizationMiddleware(
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Path.StartsWithSegments("/DatabaseTest"))
+        if (context.GetEndpoint()?.Metadata.GetMetadata<AdminProtectedAttribute>() is not null)
         {
             var token = context.Request.Headers.Authorization.ToString();
             token = token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
@@ -23,8 +24,6 @@ public sealed class AdminAuthorizationMiddleware(
                 return;
             }
         }
-
-        //context.Request.Path.StartsWithSegments("/WorkItems")
 
         await next(context);
     }

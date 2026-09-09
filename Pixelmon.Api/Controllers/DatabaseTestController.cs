@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pixelmon.Api.Attributes;
 using Pixelmon.Api.Services;
 
 namespace Pixelmon.Api.Controllers;
@@ -42,6 +43,7 @@ public class DatabaseTestController(
         return Ok(workAreas);
     }
 
+    [AdminProtected]
     [HttpGet("GetStaffRanks")]
     public async Task<IActionResult> GetStaffRanks(CancellationToken cancellationToken)
     {
@@ -52,6 +54,7 @@ public class DatabaseTestController(
         return Ok(staffRanks);
     }
 
+    [AdminProtected]
     [HttpGet("GetStaff")]
     public async Task<IActionResult> GetStaff(CancellationToken cancellationToken)
     {
@@ -62,6 +65,7 @@ public class DatabaseTestController(
         return Ok(staff);
     }
 
+    [AdminProtected]
     [HttpGet("GetWorkItemStatuses")]
     public async Task<IActionResult> GetWorkItemStatuses(CancellationToken cancellationToken)
     {
@@ -72,6 +76,7 @@ public class DatabaseTestController(
         return Ok(statuses);
     }
 
+    [AdminProtected]
     [HttpGet("GetWorkItems")]
     public async Task<IActionResult> GetWorkItems(CancellationToken cancellationToken)
     {
