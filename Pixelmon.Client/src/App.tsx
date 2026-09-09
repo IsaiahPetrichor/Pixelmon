@@ -7,8 +7,8 @@ import Login from './pages/Login/Login';
 import { useEffect, useState } from 'react';
 import { IconContext } from 'react-icons';
 
-const apiBaseUrl = 'http://localhost:5172';
-const adminTokenStorageKey = 'adminToken';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 export type AuthUser = {
   userId: number;
@@ -27,10 +27,10 @@ function App() {
 function AuthenticatedApp() {
   const navigate = useNavigate();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(() => Boolean(sessionStorage.getItem(adminTokenStorageKey)));
+  const [isCheckingAuth, setIsCheckingAuth] = useState(() => Boolean(sessionStorage.getItem(authTokenKey)));
 
   useEffect(() => {
-    const token = sessionStorage.getItem(adminTokenStorageKey);
+    const token = sessionStorage.getItem(authTokenKey);
     if (!token) return;
 
     fetch(`${apiBaseUrl}/AdminAuth/validate`, { headers: { Authorization: `Bearer ${token}` } })
@@ -41,14 +41,14 @@ function AuthenticatedApp() {
         setAuthUser(result.user);
       })
       .catch(() => {
-        sessionStorage.removeItem(adminTokenStorageKey);
+        sessionStorage.removeItem(authTokenKey);
         setAuthUser(null);
       })
       .finally(() => setIsCheckingAuth(false));
   }, []);
 
   function handleSignOut() {
-    sessionStorage.removeItem(adminTokenStorageKey);
+    sessionStorage.removeItem(authTokenKey);
     setAuthUser(null);
     navigate('/');
   }
@@ -88,7 +88,9 @@ function AuthenticatedApp() {
           <Route path="/login" element={<Login onAuthenticated={setAuthUser} />} />
           <Route
             path="/admin"
-            element={isCheckingAuth ? <p>Checking access...</p> : canAccessAdmin ? <Admin /> : <Navigate to="/login" replace />}
+            element={
+              isCheckingAuth ? <p>Checking access...</p> : canAccessAdmin ? <Admin /> : <Navigate to="/login" replace />
+            }
           />
         </Routes>
       </main>

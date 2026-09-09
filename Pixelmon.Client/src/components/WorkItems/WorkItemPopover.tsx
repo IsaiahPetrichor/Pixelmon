@@ -20,8 +20,8 @@ type WorkItemPopoverProps = {
   onSaved: () => void;
 };
 
-const apiUrl = 'http://localhost:5172';
-const adminTokenStorageKey = 'adminToken';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 function WorkItemPopover({
   workItem,
@@ -50,15 +50,18 @@ function WorkItemPopover({
     setIsSaving(true);
     setError('');
 
-    const token = sessionStorage.getItem(adminTokenStorageKey);
+    const token = sessionStorage.getItem(authTokenKey);
     const request = { regionId, routeId, assignedToId, workAreaId, statusId, shortDescription, longDescription };
 
     try {
-      const response = await fetch(`${apiUrl}/WorkItem/${workItem ? `UpdateWorkItem/${workItem.id}` : 'AddWorkItem'}`, {
-        method: workItem ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(request),
-      });
+      const response = await fetch(
+        `${apiBaseUrl}/WorkItem/${workItem ? `UpdateWorkItem/${workItem.id}` : 'AddWorkItem'}`,
+        {
+          method: workItem ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(request),
+        },
+      );
 
       if (!response.ok) throw new Error('Unable to save work item.');
       onSaved();

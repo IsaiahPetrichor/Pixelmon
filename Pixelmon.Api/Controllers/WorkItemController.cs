@@ -31,6 +31,7 @@ public class WorkItemController(ILogger<WorkItemController> logger, IDatabaseSer
         return Ok(workItemsForRegion);
     }
 
+    [AdminProtected(minimumPermissionLevel: 2)]
     [HttpPost("AddWorkItem")]
     public async Task<IActionResult> CreateWorkItem([FromBody] WorkItemRequest request, CancellationToken cancellationToken)
     {
@@ -60,6 +61,7 @@ public class WorkItemController(ILogger<WorkItemController> logger, IDatabaseSer
             : NotFound("Work item was not found or could not be updated.");
     }
 
+    [AdminProtected(minimumPermissionLevel: 2)]
     [HttpDelete("DeleteWorkItem/{id:int}")]
     public async Task<IActionResult> DeleteWorkItem(int id, CancellationToken cancellationToken)
     {

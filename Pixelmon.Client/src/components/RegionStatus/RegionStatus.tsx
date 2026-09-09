@@ -4,13 +4,16 @@ import type { RegionStatus } from './RegionStatus.types';
 function RegionStatusComponent({ regionId }: { regionId: string }) {
   const [status, setStatus] = useState<RegionStatus>();
 
+  const apiBaseUrl = import.meta.env.VITE_API_URL;
+  //   const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
+
   useEffect(() => {
-    const response: Promise<RegionStatus> = fetch(`http://localhost:5172/RegionStatus/GetKantoStatus`).then((res) => {
+    const response: Promise<RegionStatus> = fetch(`${apiBaseUrl}/RegionStatus/GetKantoStatus`).then((res) => {
       return res.json();
     });
 
     response.then((data) => setStatus(data));
-  }, [regionId]);
+  }, [apiBaseUrl, regionId]);
 
   return (
     <div>

@@ -10,8 +10,8 @@ import WorkItemPopover from './WorkItemPopover';
 import './WorkItemList.css';
 import { VscTrash } from 'react-icons/vsc';
 
-const apiUrl = 'http://localhost:5172';
-const adminTokenStorageKey = 'adminToken';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 function WorkItemList() {
   const [regions, setRegions] = useState<PokemonRegion[]>([]);
@@ -25,10 +25,10 @@ function WorkItemList() {
   const [deleteError, setDeleteError] = useState('');
 
   function refreshWorkItems() {
-    const token = sessionStorage.getItem(adminTokenStorageKey);
+    const token = sessionStorage.getItem(authTokenKey);
     if (!token) return;
 
-    fetch(`${apiUrl}/DatabaseTest/GetWorkItems`, {
+    fetch(`${apiBaseUrl}/DatabaseRaw/GetWorkItems`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => {
@@ -47,13 +47,13 @@ function WorkItemList() {
   async function deleteWorkItem(workItem: WorkItem) {
     if (!window.confirm(`Delete "${workItem.shortDescription}"?`)) return;
 
-    const token = sessionStorage.getItem(adminTokenStorageKey);
+    const token = sessionStorage.getItem(authTokenKey);
     if (!token) return;
 
     setDeleteError('');
 
     try {
-      const response = await fetch(`${apiUrl}/WorkItem/DeleteWorkItem/${workItem.id}`, {
+      const response = await fetch(`${apiBaseUrl}/WorkItem/DeleteWorkItem/${workItem.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -66,12 +66,12 @@ function WorkItemList() {
   }
 
   useEffect(() => {
-    const token = sessionStorage.getItem(adminTokenStorageKey);
+    const token = sessionStorage.getItem(authTokenKey);
     if (!token) return;
 
     refreshWorkItems();
 
-    const regionsResponse = fetch(`${apiUrl}/DatabaseTest/GetRegions`).then((response) => {
+    const regionsResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetRegions`).then((response) => {
       if (!response.ok) throw new Error();
 
       return response.json();
@@ -80,7 +80,7 @@ function WorkItemList() {
       setRegions(data);
     });
 
-    const routesResponse = fetch(`${apiUrl}/DatabaseTest/GetRoutes`).then((response) => {
+    const routesResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetRoutes`).then((response) => {
       if (!response.ok) throw new Error();
 
       return response.json();
@@ -89,7 +89,7 @@ function WorkItemList() {
       setRoutes(data);
     });
 
-    const workAreasResponse = fetch(`${apiUrl}/DatabaseTest/GetWorkAreas`).then((response) => {
+    const workAreasResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetWorkAreas`).then((response) => {
       if (!response.ok) throw new Error();
 
       return response.json();
@@ -98,7 +98,7 @@ function WorkItemList() {
       setWorkAreas(data);
     });
 
-    const staffResponse = fetch(`${apiUrl}/DatabaseTest/GetUsers`, {
+    const staffResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetUsers`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((response) => {
       if (!response.ok) throw new Error();
@@ -109,7 +109,7 @@ function WorkItemList() {
       setStaff(data);
     });
 
-    const statusesResponse = fetch(`${apiUrl}/DatabaseTest/GetWorkItemStatuses`, {
+    const statusesResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetWorkItemStatuses`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((response) => {
       if (!response.ok) throw new Error();

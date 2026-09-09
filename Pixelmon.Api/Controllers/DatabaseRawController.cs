@@ -6,11 +6,11 @@ namespace Pixelmon.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DatabaseTestController(
-    ILogger<DatabaseTestController> logger,
+public class DatabaseRawController(
+    ILogger<DatabaseRawController> logger,
     IDatabaseService databaseService) : ControllerBase
 {
-    private readonly ILogger<DatabaseTestController> _logger = logger;
+    private readonly ILogger<DatabaseRawController> _logger = logger;
     private readonly IDatabaseService _databaseService = databaseService;
 
     [HttpGet("GetRegions")]

@@ -24,7 +24,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
 
-  background-image: url('../public/resources/images/Route6.png');
+  background-image: url('/resources/images/Route6.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
@@ -73,23 +73,9 @@ ul a {
   border-radius: 3px;
 }
 
-.nav-button {
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 3px;
-  color: var(--text);
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
 nav a:hover {
   background-color: rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s;
-}
-
-.nav-button:hover {
-  background-color: rgba(0, 0, 0, 0.2);
 }
 
 footer {
