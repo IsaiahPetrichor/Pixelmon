@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.72);
+  background: var(--section-bg);
 }
 
 .work-item-popover {
@@ -58,8 +58,8 @@
   width: 100%;
   padding: 0.65rem 0.7rem;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(208, 207, 209, 0.45);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 2px;
   font: inherit;
 }
@@ -94,7 +94,7 @@ select,
 select ::picker(select) {
   border-color: red;
   border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.72);
+  background-color: var(--section-bg);
   padding: 4px;
 }
 

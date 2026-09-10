@@ -1,0 +1,40 @@
+.region-status-detailed {
+  background-color: var(--section-bg);
+}
+
+.region-status-detailed ul {
+  list-style-type: none;
+}
+
+.region-status-detailed li,
+.region-header {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.region-header {
+  border-bottom: 1px solid var(--accent-border);
+}
+
+.region-status-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  text-wrap: nowrap;
+  margin: 0;
+}
+
+.region-status-progress-bar p {
+  margin: 0;
+}
+
+.region-status-progress {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 3px;
+  margin-right: 1rem;
+}

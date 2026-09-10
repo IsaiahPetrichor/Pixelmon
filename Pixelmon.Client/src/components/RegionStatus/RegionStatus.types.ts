@@ -1,4 +1,6 @@
-export type RegionStatus = {
+export type RegionStatus = Record<string, Record<string, number>>;
+
+export type RegionStatusComponentProps = {
   regionName: string;
-  message: string;
+  status: RegionStatus;
 };

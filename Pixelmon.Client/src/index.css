@@ -1,13 +1,19 @@
 :root {
   --text: #d0cfd1;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #303030;
-  --code-bg: #f4f3ec;
-  --accent: #970606;
-  --accent-bg: rgba(0, 0, 0, 1);
+  --bg: rgba(20, 20, 20, 0.4);
+  --border: rgb(46, 46, 46);
+  --accent: rgb(152, 6, 6);
+  --accent-bg: rgb(20, 35, 70);
+  --accent-bg2: rgb(20, 20, 20);
   --accent-border: rgba(155, 19, 19, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --accent-border2: rgba(244, 243, 236, 0.5);
+  --accent-hover: rgba(0, 0, 0, 0.2);
+  --section-bg: rgba(0, 0, 0, 0.6);
+  --input-bg: rgba(255, 255, 255, 0.08);
+  --input-border: rgba(208, 207, 209, 0.45);
+  --progress-full: rgb(161, 1, 1);
+  --progress-empty: rgb(199, 199, 199);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;

@@ -4,7 +4,7 @@
   margin: 12dvh auto;
   padding: 2rem 4dvw;
   text-align: left;
-  background: rgba(10, 10, 15, 0.82);
+  background-color: var(--section-bg);
   border-top: 3px solid var(--accent);
   box-shadow: var(--shadow);
 }
@@ -40,8 +40,8 @@
   margin-bottom: 0.75rem;
   padding: 0.7rem 0.8rem;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(208, 207, 209, 0.45);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 2px;
   font: inherit;
 }
@@ -90,9 +90,10 @@
 }
 
 .admin-placeholder {
-  margin-top: 2rem;
-  padding: 1.25rem;
-  border: 1px dashed rgba(208, 207, 209, 0.45);
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
   overflow-x: auto;
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Home.css';
+import { Link } from 'react-router-dom';
 
 type RegionStatuses = {
   Kanto: number;
@@ -52,7 +53,7 @@ function Home() {
               <div
                 className="progress"
                 style={{
-                  backgroundImage: `linear-gradient(to right, rgb(161, 1, 1) ${kantoProgress}%, rgb(199, 199, 199) ${kantoProgress ? kantoProgress + 2 : 0}%)`,
+                  backgroundImage: `linear-gradient(to right, var(--progress-full) ${kantoProgress}%, var(--progress-empty) ${kantoProgress ? kantoProgress + 2 : 0}%)`,
                 }}
               ></div>
               <p>{kantoProgress ?? '...'}% Complete</p>
@@ -73,7 +74,7 @@ function Home() {
               <div
                 className="progress"
                 style={{
-                  backgroundImage: `linear-gradient(to right, rgb(161, 1, 1) ${hoennProgress}%, rgb(199, 199, 199) ${hoennProgress ? hoennProgress + 2 : 0}%)`,
+                  backgroundImage: `linear-gradient(to right, var(--progress-full) ${hoennProgress}%, var(--progress-empty) ${hoennProgress ? hoennProgress + 2 : 0}%)`,
                 }}
               ></div>
               <p>{hoennProgress ?? '...'}% Complete</p>
@@ -88,7 +89,7 @@ function Home() {
               <div
                 className="progress"
                 style={{
-                  backgroundImage: `linear-gradient(to right, rgb(161, 1, 1) ${sinnohProgress}%, rgb(199, 199, 199) ${sinnohProgress ? sinnohProgress + 2 : 0}%)`,
+                  backgroundImage: `linear-gradient(to right, var(--progress-full) ${sinnohProgress}%, var(--progress-empty) ${sinnohProgress ? sinnohProgress + 2 : 0}%)`,
                 }}
               ></div>
               <p>{sinnohProgress ?? '...'}% Complete</p>
@@ -99,7 +100,7 @@ function Home() {
           </div>
         </div>
         <p>
-          Check out our <a href="/regions">progress page</a> for more details!
+          Check out our <Link to="/regions">progress page</Link> for more details!
         </p>
       </section>
     </>

@@ -1,6 +1,6 @@
 main {
   width: 100%;
-  background-color: rgba(20, 20, 20, 0.4);
+  background-color: var(--bg);
   margin: 0 auto;
 }
 
@@ -14,7 +14,7 @@ main {
 body {
   position: relative;
   z-index: 1;
-  background-color: rgb(20, 35, 70);
+  background-color: var(--accent-bg);
 }
 
 body::before {
@@ -38,7 +38,7 @@ header {
   justify-items: center;
   flex-wrap: nowrap;
   padding: 0 4dvw;
-  background-color: rgb(20, 20, 20);
+  background-color: var(--accent-bg2);
 }
 
 header h1 {
@@ -83,12 +83,12 @@ ul a {
 
 .nav-button:hover,
 nav a:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--accent-hover);
   transition: background-color 0.3s;
 }
 
 footer {
-  background-color: rgb(20, 20, 20);
+  background-color: var(--accent-bg2);
   padding: 20px auto;
   font-size: 1rem;
 }

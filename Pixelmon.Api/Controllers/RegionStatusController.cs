@@ -71,13 +71,50 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
         return Ok(allRegions);
     }
 
-    [HttpGet("GetKantoStatus")]
-    public async Task<IActionResult> GetKantoStatus()
+    [HttpGet("GetDetailedStatus")]
+    public async Task<IActionResult> GetDetailedStatus()
     {
-        _logger.LogInformation("GetKantoStatus called.");
+        _logger.LogInformation("GetDetailedStatus called.");
 
-        var status = new { regionName = "Kanto", Message = "Kanto is in progress." };
-        return Ok(status);
+        var regions = await _databaseService.QueryRegions();
+        var routes = await _databaseService.QueryRoutes();
+        var workAreas = await _databaseService.QueryWorkAreas();
+        var workItems = await _databaseService.QueryWorkItems();
+
+        Dictionary<string, Dictionary<string, Dictionary<string, double>>> detailedStatus = [];
+
+        foreach (var region in regions)
+        {
+            Dictionary<string, Dictionary<string, double>> regionStatus = [];
+
+            foreach (var route in routes.Where(route => route.RegionId == region.Id))
+            {
+                Dictionary<string, double> routeStatus = [];
+
+                foreach (var workArea in workAreas)
+                {
+                    var completeItems = workItems.Count(workItem =>
+                        workItem.RegionId == region.Id &&
+                        workItem.RouteId == route.Id &&
+                        workItem.WorkAreaId == workArea.Id &&
+                        workItem.StatusId == 3);
+                    var totalItems = workItems.Count(workItem =>
+                        workItem.RegionId == region.Id &&
+                        workItem.RouteId == route.Id &&
+                        workItem.WorkAreaId == workArea.Id);
+
+                    routeStatus[workArea.AreaName] = totalItems > 0
+                        ? (double)completeItems / totalItems
+                        : 1.00;
+                }
+
+                regionStatus[route.RouteName] = routeStatus;
+            }
+
+            detailedStatus[region.RegionName] = regionStatus;
+
+        }
+        return Ok(detailedStatus);
     }
 
 }
