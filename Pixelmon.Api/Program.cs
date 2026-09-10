@@ -53,18 +53,29 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("ProdPolicy", policy =>
     {
-        policy.WithOrigins("https://isaiahpetrichor.github.io/")
+        policy.WithOrigins("https://isaiahpetrichor.github.io")
             .AllowAnyMethod()
             .AllowAnyHeader();
+        
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+
+        policy.WithOrigins("http://192.168.0.46")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
 
-app.UseCors("DevPolicy");
+app.UseCors(app.Environment.IsDevelopment() ? "DevPolicy" : "ProdPolicy");
 if (!app.Environment.IsDevelopment())
 {
-    app.UseCors("ProdPolicy");
+    Console.WriteLine("API Running in [Production]");
+}
+else {
+    Console.WriteLine("API Running in [Development]");
 }
 
 app.UseSwagger();
