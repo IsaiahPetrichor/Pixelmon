@@ -10,6 +10,7 @@ import WorkItemPopover from './WorkItemPopover';
 import './WorkItemList.css';
 import { VscTrash } from 'react-icons/vsc';
 import { authenticatedFetch } from '../../apiClient';
+import { compareRouteNames } from '../../utils/routeSorting';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
@@ -85,7 +86,9 @@ function WorkItemList() {
     const comparison =
       typeof leftValue === 'number' && typeof rightValue === 'number'
         ? leftValue - rightValue
-        : String(leftValue).localeCompare(String(rightValue));
+        : sortColumn === 'location'
+          ? compareRouteNames(String(leftValue), String(rightValue))
+          : String(leftValue).localeCompare(String(rightValue));
 
     return sortDirection === 'ascending' ? comparison : -comparison;
   });

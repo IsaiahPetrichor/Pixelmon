@@ -2,6 +2,7 @@ import { useState, type SubmitEvent } from 'react';
 import type { WorkItem } from '../../types/WorkItem';
 import type { PokemonRegion } from '../../types/PokemonRegion';
 import type { PokemonRoute } from '../../types/PokemonRoute';
+import { compareRouteNames } from '../../utils/routeSorting';
 import type { WorkArea } from '../../types/WorkArea';
 import type { Staff } from '../../types/Staff';
 import type { WorkItemStatus } from '../../types/WorkItemStatus';
@@ -42,7 +43,9 @@ function WorkItemPopover({
   const [error, setError] = useState('');
 
   const selectedRegionId = regions.some((region) => region.id === regionId) ? regionId : (regions[0]?.id ?? 0);
-  const availableRoutes = routes.filter((route) => route.regionId === selectedRegionId);
+  const availableRoutes = routes
+    .filter((route) => route.regionId === selectedRegionId)
+    .sort((firstRoute, secondRoute) => compareRouteNames(firstRoute.routeName, secondRoute.routeName));
   const selectedRouteId = availableRoutes.some((route) => route.id === routeId)
     ? routeId
     : (availableRoutes[0]?.id ?? 0);
@@ -111,7 +114,9 @@ function WorkItemPopover({
               value={selectedRegionId}
               onChange={(event) => {
                 const nextRegionId = Number(event.target.value);
-                const nextRoutes = routes.filter((route) => route.regionId === nextRegionId);
+                const nextRoutes = routes
+                  .filter((route) => route.regionId === nextRegionId)
+                  .sort((firstRoute, secondRoute) => compareRouteNames(firstRoute.routeName, secondRoute.routeName));
                 setRegionId(nextRegionId);
                 setRouteId(nextRoutes[0]?.id ?? 0);
               }}

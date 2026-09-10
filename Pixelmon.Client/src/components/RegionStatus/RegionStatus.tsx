@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RegionStatusComponentProps } from './RegionStatus.types';
 import './RegionStatus.css';
+import { compareRouteNames } from '../../utils/routeSorting';
 
 type ProgressBarProps = {
   label: string;
@@ -67,12 +68,12 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
         [
           workAreaName,
           [...routeProgress].sort((firstRoute, secondRoute) =>
-            firstRoute.routeName.localeCompare(secondRoute.routeName),
+            compareRouteNames(firstRoute.routeName, secondRoute.routeName),
           ),
         ] as const,
     );
   const sortedRouteWorkAreaProgress = Object.entries(status)
-    .sort(([firstRoute], [secondRoute]) => firstRoute.localeCompare(secondRoute))
+    .sort(([firstRoute], [secondRoute]) => compareRouteNames(firstRoute, secondRoute))
     .map(
       ([routeName, workAreas]) =>
         [
