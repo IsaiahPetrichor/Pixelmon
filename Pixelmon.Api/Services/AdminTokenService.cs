@@ -8,12 +8,18 @@ namespace Pixelmon.Api.Services;
 public sealed class AdminTokenService(IConfiguration configuration)
 {
     private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(1);
+    private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(30);
     private readonly byte[] _signingKey = Encoding.UTF8.GetBytes(configuration["AdminAccess:ApiKey"] ?? string.Empty);
 
     public string CreateToken(AuthenticatedUser user)
     {
+        return CreateToken(new AuthToken(user.Id, user.Username, user.PermissionLevel));
+    }
+
+    public string CreateToken(AuthToken user)
+    {
         var payload = new AdminTokenPayload(
-            user.Id,
+            user.UserId,
             user.Username,
             user.PermissionLevel,
             DateTimeOffset.UtcNow.Add(TokenLifetime).ToUnixTimeSeconds());
@@ -77,7 +83,61 @@ public sealed class AdminTokenService(IConfiguration configuration)
         return Convert.FromBase64String(paddedValue);
     }
 
+    public string CreateRefreshToken(AuthToken user)
+    {
+        var payload = new RefreshTokenPayload(
+            user.UserId,
+            user.Username,
+            user.PermissionLevel,
+            DateTimeOffset.UtcNow.Add(RefreshTokenLifetime).ToUnixTimeSeconds());
+        var encodedPayload = Base64UrlEncode(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload)));
+        var signature = SignRefreshToken(encodedPayload);
+
+        return $"{encodedPayload}.{signature}";
+    }
+
+    public bool IsValidRefreshToken(string? token, out AuthToken? authToken)
+    {
+        authToken = null;
+        if (string.IsNullOrWhiteSpace(token)) return false;
+
+        var tokenParts = token.Split('.', 2);
+        if (tokenParts.Length != 2 || !IsSignatureValid(tokenParts[0], tokenParts[1], SignRefreshToken)) return false;
+
+        try
+        {
+            var payload = JsonSerializer.Deserialize<RefreshTokenPayload>(Base64UrlDecode(tokenParts[0]));
+            if (payload is null || payload.ExpiresAt <= DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return false;
+
+            authToken = new AuthToken(payload.UserId, payload.Username, payload.PermissionLevel);
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private string SignRefreshToken(string value)
+    {
+        return Base64UrlEncode(HMACSHA256.HashData(_signingKey, Encoding.UTF8.GetBytes($"refresh:{value}")));
+    }
+
+    private static bool IsSignatureValid(string payload, string signature, Func<string, string> sign)
+    {
+        var expectedSignature = Encoding.UTF8.GetBytes(sign(payload));
+        var providedSignature = Encoding.UTF8.GetBytes(signature);
+
+        return providedSignature.Length == expectedSignature.Length &&
+            CryptographicOperations.FixedTimeEquals(providedSignature, expectedSignature);
+    }
+
     private sealed record AdminTokenPayload(int UserId, string Username, int PermissionLevel, long ExpiresAt);
+    private sealed record RefreshTokenPayload(int UserId, string Username, int PermissionLevel, long ExpiresAt);
 }
 
 public sealed record AuthToken(int UserId, string Username, int PermissionLevel);

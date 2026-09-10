@@ -6,6 +6,7 @@ import type { WorkArea } from '../../types/WorkArea';
 import type { Staff } from '../../types/Staff';
 import type { WorkItemStatus } from '../../types/WorkItemStatus';
 import { VscClose } from 'react-icons/vsc';
+import { authenticatedFetch } from '../../apiClient';
 
 import './WorkItemPopover.css';
 
@@ -19,9 +20,6 @@ type WorkItemPopoverProps = {
   onClose: () => void;
   onSaved: () => void;
 };
-
-const apiBaseUrl = import.meta.env.VITE_API_URL;
-const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 function WorkItemPopover({
   workItem,
@@ -59,7 +57,6 @@ function WorkItemPopover({
     setIsSaving(true);
     setError('');
 
-    const token = sessionStorage.getItem(authTokenKey);
     const request = {
       regionId: selectedRegionId,
       routeId: selectedRouteId,
@@ -71,11 +68,11 @@ function WorkItemPopover({
     };
 
     try {
-      const response = await fetch(
-        `${apiBaseUrl}/WorkItem/${workItem ? `UpdateWorkItem/${workItem.id}` : 'AddWorkItem'}`,
+      const response = await authenticatedFetch(
+        `/WorkItem/${workItem ? `UpdateWorkItem/${workItem.id}` : 'AddWorkItem'}`,
         {
           method: workItem ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(request),
         },
       );

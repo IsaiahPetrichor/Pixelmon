@@ -6,8 +6,8 @@ import Admin from './pages/Admin/Admin';
 import Login from './pages/Login/Login';
 import { useEffect, useState } from 'react';
 import { IconContext } from 'react-icons';
+import { authenticatedFetch, clearAuthTokens } from './apiClient';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL;
 const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 export type AuthUser = {
@@ -30,10 +30,9 @@ function AuthenticatedApp() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(() => Boolean(sessionStorage.getItem(authTokenKey)));
 
   useEffect(() => {
-    const token = sessionStorage.getItem(authTokenKey);
-    if (!token) return;
+    if (!sessionStorage.getItem(authTokenKey)) return;
 
-    fetch(`${apiBaseUrl}/AdminAuth/validate`, { headers: { Authorization: `Bearer ${token}` } })
+    authenticatedFetch('/AdminAuth/validate')
       .then(async (response) => {
         if (!response.ok) throw new Error('Invalid session');
 
@@ -41,14 +40,14 @@ function AuthenticatedApp() {
         setAuthUser(result.user);
       })
       .catch(() => {
-        sessionStorage.removeItem(authTokenKey);
+        clearAuthTokens();
         setAuthUser(null);
       })
       .finally(() => setIsCheckingAuth(false));
   }, []);
 
   function handleSignOut() {
-    sessionStorage.removeItem(authTokenKey);
+    clearAuthTokens();
     setAuthUser(null);
     navigate('/');
   }

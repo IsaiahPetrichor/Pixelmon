@@ -28,7 +28,7 @@ public class AdminAuthController(
         _logger.LogInformation("[AdminAuth/Verify] called, user is {AuthStatus}.", passwordValid ? "authorized" : "unauthorized");
 
         return passwordValid
-            ? Ok(new { authorized = true, token = tokenService.CreateToken(user!) })
+            ? CreateAuthResponse(new AuthToken(user!.Id, user.Username, user.PermissionLevel))
             : Unauthorized(new { authorized = false, message = "Invalid username or password." });
     }
 
@@ -66,7 +66,7 @@ public class AdminAuthController(
         var authenticatedUser = await databaseService.QueryUserForAuthentication(normalizedUsername, cancellationToken);
         return authenticatedUser is null
             ? StatusCode(StatusCodes.Status500InternalServerError)
-            : Ok(new { authorized = true, token = tokenService.CreateToken(authenticatedUser) });
+            : CreateAuthResponse(new AuthToken(authenticatedUser.Id, authenticatedUser.Username, authenticatedUser.PermissionLevel));
     }
 
     [HttpGet("validate")]
@@ -83,8 +83,28 @@ public class AdminAuthController(
             ? Ok(new { authorized = true, user = authToken })
             : Unauthorized(new { authorized = false });
     }
+
+    [HttpPost("refresh")]
+    public IActionResult Refresh(RefreshRequest request)
+    {
+        return tokenService.IsValidRefreshToken(request.RefreshToken, out var user)
+            ? CreateAuthResponse(user!)
+            : Unauthorized(new { authorized = false, message = "Refresh token is invalid or expired." });
+    }
+
+    private OkObjectResult CreateAuthResponse(AuthToken user)
+    {
+        return Ok(new
+        {
+            authorized = true,
+            token = tokenService.CreateToken(user),
+            refreshToken = tokenService.CreateRefreshToken(user),
+        });
+    }
 }
 
 public sealed record AdminCredentials(string Username, string Password);
 
 public sealed record SignUpRequest(string Username, string Password);
+
+public sealed record RefreshRequest(string RefreshToken);

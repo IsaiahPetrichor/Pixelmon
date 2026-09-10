@@ -1,9 +1,9 @@
 import { useState, type SubmitEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Admin/Admin.css';
+import { authenticatedFetch, storeAuthTokens } from '../../apiClient';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL;
-const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 type AuthUser = {
   userId: number;
@@ -45,11 +45,9 @@ function Login({ onAuthenticated }: LoginProps) {
         throw new Error(result.message ?? 'Unable to authenticate.');
       }
 
-      const result: { token: string } = await response.json();
-      sessionStorage.setItem(authTokenKey, result.token);
-      const validationResponse = await fetch(`${apiBaseUrl}/AdminAuth/validate`, {
-        headers: { Authorization: `Bearer ${result.token}` },
-      });
+      const result: { token: string; refreshToken: string } = await response.json();
+      storeAuthTokens(result.token, result.refreshToken);
+      const validationResponse = await authenticatedFetch('/AdminAuth/validate');
       const validationResult: { user: AuthUser } = await validationResponse.json();
 
       onAuthenticated(validationResult.user);

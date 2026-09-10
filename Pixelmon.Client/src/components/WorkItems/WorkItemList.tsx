@@ -9,6 +9,7 @@ import WorkItemPopover from './WorkItemPopover';
 
 import './WorkItemList.css';
 import { VscTrash } from 'react-icons/vsc';
+import { authenticatedFetch } from '../../apiClient';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
@@ -111,9 +112,7 @@ function WorkItemList() {
     const token = sessionStorage.getItem(authTokenKey);
     if (!token) return;
 
-    fetch(`${apiBaseUrl}/DatabaseRaw/GetWorkItems`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    authenticatedFetch('/DatabaseRaw/GetWorkItems')
       .then((response) => {
         if (!response.ok) throw new Error();
 
@@ -136,9 +135,8 @@ function WorkItemList() {
     setDeleteError('');
 
     try {
-      const response = await fetch(`${apiBaseUrl}/WorkItem/DeleteWorkItem/${workItem.id}`, {
+      const response = await authenticatedFetch(`/WorkItem/DeleteWorkItem/${workItem.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) throw new Error();
@@ -181,9 +179,7 @@ function WorkItemList() {
       setWorkAreas(data);
     });
 
-    const staffResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetUsers`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((response) => {
+    const staffResponse = authenticatedFetch('/DatabaseRaw/GetUsers').then((response) => {
       if (!response.ok) throw new Error();
 
       return response.json();
@@ -192,9 +188,7 @@ function WorkItemList() {
       setStaff(data);
     });
 
-    const statusesResponse = fetch(`${apiBaseUrl}/DatabaseRaw/GetWorkItemStatuses`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((response) => {
+    const statusesResponse = authenticatedFetch('/DatabaseRaw/GetWorkItemStatuses').then((response) => {
       if (!response.ok) throw new Error();
 
       return response.json();
