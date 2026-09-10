@@ -12,6 +12,19 @@ import { VscTrash } from 'react-icons/vsc';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL;
 const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
+const rowsPerPage = 50;
+type SortColumn = 'id' | 'region' | 'location' | 'title' | 'workArea' | 'assignedTo' | 'status';
+type SortDirection = 'ascending' | 'descending';
+
+const sortLabels: Record<SortColumn, string> = {
+  id: 'Id',
+  region: 'Region',
+  location: 'Location',
+  title: 'Title',
+  workArea: 'Work Area',
+  assignedTo: 'Assigned To',
+  status: 'Status',
+};
 
 function WorkItemList() {
   const [regions, setRegions] = useState<PokemonRegion[]>([]);
@@ -23,6 +36,76 @@ function WorkItemList() {
   const [selectedWorkItem, setSelectedWorkItem] = useState<WorkItem | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [sortColumn, setSortColumn] = useState<SortColumn>('id');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('ascending');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [assignedToFilter, setAssignedToFilter] = useState('all');
+
+  function getSortValue(workItem: WorkItem, column: SortColumn): number | string {
+    switch (column) {
+      case 'id':
+        return workItem.id;
+      case 'region':
+        return regions.find((region) => region.id == workItem.regionId)?.regionName ?? 'UNKNOWN';
+      case 'location':
+        return routes.find((route) => route.id == workItem.routeId)?.routeName ?? 'UNKNOWN';
+      case 'title':
+        return workItem.shortDescription;
+      case 'workArea':
+        return workAreas.find((workArea) => workArea.id == workItem.workAreaId)?.areaName ?? 'UNKNOWN';
+      case 'assignedTo':
+        return staff.find((member) => member.id == workItem.assignedToId)?.username ?? 'Unassigned';
+      case 'status':
+        return statuses.find((itemStatus) => itemStatus.id == workItem.statusId)?.statusName ?? 'UNKNOWN';
+    }
+  }
+
+  function sortBy(column: SortColumn) {
+    if (sortColumn === column) {
+      setSortDirection((currentDirection) => (currentDirection === 'ascending' ? 'descending' : 'ascending'));
+      return;
+    }
+
+    setSortColumn(column);
+    setSortDirection('ascending');
+  }
+
+  const filteredWorkItems = workItems.filter((workItem) => {
+    const matchesStatus = statusFilter === 'all' || String(workItem.statusId) === statusFilter;
+    const matchesAssignee = assignedToFilter === 'all' || String(workItem.assignedToId) === assignedToFilter;
+
+    return matchesStatus && matchesAssignee;
+  });
+
+  const sortedWorkItems = [...filteredWorkItems].sort((left, right) => {
+    const leftValue = getSortValue(left, sortColumn);
+    const rightValue = getSortValue(right, sortColumn);
+    const comparison =
+      typeof leftValue === 'number' && typeof rightValue === 'number'
+        ? leftValue - rightValue
+        : String(leftValue).localeCompare(String(rightValue));
+
+    return sortDirection === 'ascending' ? comparison : -comparison;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedWorkItems.length / rowsPerPage));
+  const visiblePage = Math.min(currentPage, totalPages);
+  const visibleWorkItems = sortedWorkItems.slice((visiblePage - 1) * rowsPerPage, visiblePage * rowsPerPage);
+
+  function renderSortHeader(column: SortColumn) {
+    const isActive = sortColumn === column;
+    const indicator = isActive ? (sortDirection === 'ascending' ? ' \u2191' : ' \u2193') : '';
+
+    return (
+      <th aria-sort={isActive ? sortDirection : 'none'}>
+        <button className="work-item-sort-button" type="button" onClick={() => sortBy(column)}>
+          {sortLabels[column]}
+          {indicator}
+        </button>
+      </th>
+    );
+  }
 
   function refreshWorkItems() {
     const token = sessionStorage.getItem(authTokenKey);
@@ -140,72 +223,133 @@ function WorkItemList() {
           {deleteError}
         </p>
       )}
-      <table className="work-item-list">
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Region</th>
-            <th>Location</th>
-            <th>Title</th>
-            <th>Work Area</th>
-            <th>Assigned To</th>
-            <th>Status</th>
-            <th aria-label="Actions" />
-          </tr>
-        </thead>
-        <tbody>
-          {workItems.length > 0 ? (
-            workItems.map((workItem) => {
-              const currentRegion = regions.find((region) => region.id == workItem.regionId);
-              const currentRoute = routes.find((route) => route.id == workItem.routeId);
-              const currentWorkArea = workAreas.find((workArea) => workArea.id == workItem.workAreaId);
-              const currentStaff = staff.find((staff) => staff.id == workItem.assignedToId);
-              const currentStatus = statuses.find((itemStatus) => itemStatus.id == workItem.statusId);
-
-              return (
-                <tr
-                  key={workItem.id}
-                  aria-label={`Edit ${workItem.shortDescription}`}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openWorkItem(workItem)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      openWorkItem(workItem);
-                    }
-                  }}
-                >
-                  <td>{workItem.id}</td>
-                  <td>{currentRegion ? currentRegion.regionName : 'UNKNOWN'}</td>
-                  <td>{currentRoute ? currentRoute.routeName : 'UNKNOWN'}</td>
-                  <td>{workItem.shortDescription}</td>
-                  <td>{currentWorkArea ? currentWorkArea.areaName : 'UNKNOWN'}</td>
-                  <td>{currentStaff ? currentStaff.username : 'Unassigned'}</td>
-                  <td>{currentStatus ? currentStatus.statusName : 'UNKNOWN'}</td>
-                  <td>
-                    <button
-                      className="delete-work-item-button"
-                      type="button"
-                      aria-label={`Delete ${workItem.shortDescription}`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        deleteWorkItem(workItem);
-                      }}
-                    >
-                      <VscTrash style={{ height: '1.2rem', width: '1.2rem' }} />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })
-          ) : (
+      <div className="work-item-list-filters">
+        <label>
+          Status
+          <select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All statuses</option>
+            {statuses.map((status) => (
+              <option key={status.id} value={status.id}>
+                {status.statusName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Assigned To
+          <select
+            value={assignedToFilter}
+            onChange={(event) => {
+              setAssignedToFilter(event.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">Everyone</option>
+            {staff.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.username}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="work-item-list-container">
+        <table className="work-item-list">
+          <thead>
             <tr>
-              <td colSpan={8}>No work items found</td>
+              {renderSortHeader('id')}
+              {renderSortHeader('region')}
+              {renderSortHeader('location')}
+              {renderSortHeader('title')}
+              {renderSortHeader('workArea')}
+              {renderSortHeader('assignedTo')}
+              {renderSortHeader('status')}
+              <th aria-label="Actions" />
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {visibleWorkItems.length > 0 ? (
+              visibleWorkItems.map((workItem) => {
+                const currentRegion = regions.find((region) => region.id == workItem.regionId);
+                const currentRoute = routes.find((route) => route.id == workItem.routeId);
+                const currentWorkArea = workAreas.find((workArea) => workArea.id == workItem.workAreaId);
+                const currentStaff = staff.find((staff) => staff.id == workItem.assignedToId);
+                const currentStatus = statuses.find((itemStatus) => itemStatus.id == workItem.statusId);
+
+                return (
+                  <tr
+                    key={workItem.id}
+                    aria-label={`Edit ${workItem.shortDescription}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openWorkItem(workItem)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openWorkItem(workItem);
+                      }
+                    }}
+                  >
+                    <td>{workItem.id}</td>
+                    <td>{currentRegion ? currentRegion.regionName : 'UNKNOWN'}</td>
+                    <td>{currentRoute ? currentRoute.routeName : 'UNKNOWN'}</td>
+                    <td>{workItem.shortDescription}</td>
+                    <td>{currentWorkArea ? currentWorkArea.areaName : 'UNKNOWN'}</td>
+                    <td>{currentStaff ? currentStaff.username : 'Unassigned'}</td>
+                    <td>{currentStatus ? currentStatus.statusName : 'UNKNOWN'}</td>
+                    <td>
+                      <button
+                        className="delete-work-item-button"
+                        type="button"
+                        aria-label={`Delete ${workItem.shortDescription}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          deleteWorkItem(workItem);
+                        }}
+                      >
+                        <VscTrash style={{ height: '1.2rem', width: '1.2rem' }} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={8}>No work items found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {sortedWorkItems.length > 0 && (
+        <div className="work-item-pagination" aria-label="Work item pagination">
+          <button
+            className="secondary-button"
+            type="button"
+            disabled={visiblePage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, Math.min(page, totalPages) - 1))}
+          >
+            Previous
+          </button>
+          <span>
+            Page {visiblePage} of {totalPages}
+          </span>
+          <button
+            className="secondary-button"
+            type="button"
+            disabled={visiblePage === totalPages}
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+          >
+            Next
+          </button>
+        </div>
+      )}
       {isPopoverOpen && (
         <WorkItemPopover
           workItem={selectedWorkItem}

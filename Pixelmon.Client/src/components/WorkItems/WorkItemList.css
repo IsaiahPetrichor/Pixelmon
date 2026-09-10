@@ -4,6 +4,31 @@
   margin-bottom: 1rem;
 }
 
+.work-item-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.work-item-list-filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.work-item-list-filters select {
+  min-width: 10rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(208, 207, 209, 0.45);
+  border-radius: 2px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.25);
+  font: inherit;
+}
+
 .work-item-list {
   width: 100%;
   border-collapse: collapse;
@@ -11,6 +36,11 @@
   font-size: 0.9rem;
   text-align: left;
   overflow-x: auto;
+}
+
+.work-item-list-container {
+  max-height: 1000px;
+  overflow: auto;
 }
 
 .work-item-list th,
@@ -28,6 +58,29 @@
   letter-spacing: 0.04rem;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.work-item-sort-button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.work-item-sort-button:hover,
+.work-item-sort-button:focus-visible {
+  color: #e08a8a;
+}
+
+.work-item-sort-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .work-item-list tbody tr:nth-child(even) {
@@ -97,4 +150,18 @@
   color: rgba(208, 207, 209, 0.75);
   font-style: italic;
   text-align: center;
+}
+
+.work-item-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: var(--text);
+}
+
+.work-item-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
