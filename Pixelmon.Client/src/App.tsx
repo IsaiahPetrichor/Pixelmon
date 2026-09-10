@@ -89,7 +89,13 @@ function AuthenticatedApp() {
           <Route
             path="/admin"
             element={
-              isCheckingAuth ? <p>Checking access...</p> : canAccessAdmin ? <Admin /> : <Navigate to="/login" replace />
+              isCheckingAuth ? (
+                <p>Checking access...</p>
+              ) : canAccessAdmin ? (
+                <Admin onSignOut={handleSignOut} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
         </Routes>

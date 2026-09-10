@@ -43,7 +43,14 @@ function WorkItemPopover({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const availableRoutes = routes.filter((route) => route.regionId === regionId);
+  const selectedRegionId = regions.some((region) => region.id === regionId) ? regionId : (regions[0]?.id ?? 0);
+  const availableRoutes = routes.filter((route) => route.regionId === selectedRegionId);
+  const selectedRouteId = availableRoutes.some((route) => route.id === routeId)
+    ? routeId
+    : (availableRoutes[0]?.id ?? 0);
+  const selectedWorkAreaId = workAreas.some((area) => area.id === workAreaId) ? workAreaId : (workAreas[0]?.id ?? 0);
+  const selectedAssignedToId = staff.some((member) => member.id === assignedToId) ? assignedToId : (staff[0]?.id ?? 0);
+  const selectedStatusId = statuses.some((status) => status.id === statusId) ? statusId : (statuses[0]?.id ?? 0);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,7 +58,15 @@ function WorkItemPopover({
     setError('');
 
     const token = sessionStorage.getItem(authTokenKey);
-    const request = { regionId, routeId, assignedToId, workAreaId, statusId, shortDescription, longDescription };
+    const request = {
+      regionId: selectedRegionId,
+      routeId: selectedRouteId,
+      assignedToId: selectedAssignedToId,
+      workAreaId: selectedWorkAreaId,
+      statusId: selectedStatusId,
+      shortDescription,
+      longDescription,
+    };
 
     try {
       const response = await fetch(
@@ -94,7 +109,7 @@ function WorkItemPopover({
           <label>
             Region
             <select
-              value={regionId}
+              value={selectedRegionId}
               onChange={(event) => {
                 const nextRegionId = Number(event.target.value);
                 const nextRoutes = routes.filter((route) => route.regionId === nextRegionId);
@@ -112,7 +127,7 @@ function WorkItemPopover({
           </label>
           <label>
             Location
-            <select value={routeId} onChange={(event) => setRouteId(Number(event.target.value))} required>
+            <select value={selectedRouteId} onChange={(event) => setRouteId(Number(event.target.value))} required>
               {availableRoutes.map((route) => (
                 <option key={route.id} value={route.id}>
                   {route.routeName}
@@ -122,7 +137,7 @@ function WorkItemPopover({
           </label>
           <label>
             Work area
-            <select value={workAreaId} onChange={(event) => setWorkAreaId(Number(event.target.value))} required>
+            <select value={selectedWorkAreaId} onChange={(event) => setWorkAreaId(Number(event.target.value))} required>
               {workAreas.map((area) => (
                 <option key={area.id} value={area.id}>
                   {area.areaName}
@@ -132,7 +147,7 @@ function WorkItemPopover({
           </label>
           <label>
             Assigned to
-            <select value={assignedToId} onChange={(event) => setAssignedToId(Number(event.target.value))}>
+            <select value={selectedAssignedToId} onChange={(event) => setAssignedToId(Number(event.target.value))}>
               {staff.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.username}
@@ -142,7 +157,7 @@ function WorkItemPopover({
           </label>
           <label>
             Status
-            <select value={statusId} onChange={(event) => setStatusId(Number(event.target.value))} required>
+            <select value={selectedStatusId} onChange={(event) => setStatusId(Number(event.target.value))} required>
               {statuses.map((status) => (
                 <option key={status.id} value={status.id}>
                   {status.statusName}
