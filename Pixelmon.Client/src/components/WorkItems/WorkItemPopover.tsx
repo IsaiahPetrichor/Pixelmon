@@ -36,7 +36,7 @@ function WorkItemPopover({
   const [regionId, setRegionId] = useState(workItem?.regionId ?? regions[0]?.id ?? 0);
   const [routeId, setRouteId] = useState(workItem?.routeId ?? 0);
   const [workAreaId, setWorkAreaId] = useState(workItem?.workAreaId ?? workAreas[0]?.id ?? 0);
-  const [assignedToId, setAssignedToId] = useState(workItem?.assignedToId ?? 0);
+  const [assignedToId, setAssignedToId] = useState(workItem?.assignedToId ?? 2);
   const [statusId, setStatusId] = useState(workItem?.statusId ?? statuses[0]?.id ?? 0);
   const [shortDescription, setShortDescription] = useState(workItem?.shortDescription ?? '');
   const [longDescription, setLongDescription] = useState(workItem?.longDescription ?? '');
@@ -49,7 +49,9 @@ function WorkItemPopover({
     ? routeId
     : (availableRoutes[0]?.id ?? 0);
   const selectedWorkAreaId = workAreas.some((area) => area.id === workAreaId) ? workAreaId : (workAreas[0]?.id ?? 0);
-  const selectedAssignedToId = staff.some((member) => member.id === assignedToId) ? assignedToId : (staff[0]?.id ?? 0);
+  const selectedAssignedToId = staff.some((member) => member.id === assignedToId)
+    ? assignedToId
+    : (staff.find((member) => member.id === 2)?.id ?? staff[0]?.id ?? 0);
   const selectedStatusId = statuses.some((status) => status.id === statusId) ? statusId : (statuses[0]?.id ?? 0);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
