@@ -7,6 +7,11 @@ type ProgressBarProps = {
   percentage: number;
 };
 
+type WorkAreaRouteProgress = {
+  routeName: string;
+  completionRate: number;
+};
+
 function ProgressBar({ label, percentage }: ProgressBarProps) {
   return (
     <div className="region-status-progress-bar">
@@ -44,17 +49,39 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
       ? routeCompletionRates.reduce((total, route) => total + route.completionRate, 0) / routeCompletionRates.length
       : 0;
   const overallPercentage = Math.floor(overallCompletionRate * 100);
-  const workAreaCompletionRates = Object.values(status).reduce<Record<string, number[]>>(
-    (completionRatesByArea, workAreas) => {
+  const workAreaRouteProgress = Object.entries(status).reduce<Record<string, WorkAreaRouteProgress[]>>(
+    (progressByArea, [routeName, workAreas]) => {
       Object.entries(workAreas).forEach(([workAreaName, completionRate]) => {
-        completionRatesByArea[workAreaName] ??= [];
-        completionRatesByArea[workAreaName].push(completionRate);
+        progressByArea[workAreaName] ??= [];
+        progressByArea[workAreaName].push({ routeName, completionRate });
       });
 
-      return completionRatesByArea;
+      return progressByArea;
     },
     {},
   );
+  const sortedWorkAreaRouteProgress = Object.entries(workAreaRouteProgress)
+    .sort(([firstWorkArea], [secondWorkArea]) => firstWorkArea.localeCompare(secondWorkArea))
+    .map(
+      ([workAreaName, routeProgress]) =>
+        [
+          workAreaName,
+          [...routeProgress].sort((firstRoute, secondRoute) =>
+            firstRoute.routeName.localeCompare(secondRoute.routeName),
+          ),
+        ] as const,
+    );
+  const sortedRouteWorkAreaProgress = Object.entries(status)
+    .sort(([firstRoute], [secondRoute]) => firstRoute.localeCompare(secondRoute))
+    .map(
+      ([routeName, workAreas]) =>
+        [
+          routeName,
+          Object.entries(workAreas).sort(([firstWorkArea], [secondWorkArea]) =>
+            firstWorkArea.localeCompare(secondWorkArea),
+          ),
+        ] as const,
+    );
 
   return (
     <section className="region-status-detailed">
@@ -64,22 +91,59 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
       </div>
       <div>
         <h3>{showRouteProgress ? 'Progress by Route' : 'Progress by Work Area'}</h3>
-        <ul>
+        <ul className={showRouteProgress ? 'region-status-route-list' : undefined}>
           {showRouteProgress
-            ? routeCompletionRates.map(({ routeName, completionRate }) => (
-                <li key={routeName}>
-                  <span>{routeName}</span>
-                  <ProgressBar label={routeName} percentage={Math.floor(completionRate * 100)} />
-                </li>
-              ))
-            : Object.entries(workAreaCompletionRates).map(([workAreaName, completionRates]) => {
+            ? sortedRouteWorkAreaProgress.map(([routeName, workAreas]) => {
+                const completionRates = workAreas.map(([, completionRate]) => completionRate);
                 const completionRate =
                   completionRates.reduce((total, rate) => total + rate, 0) / completionRates.length;
 
                 return (
-                  <li key={workAreaName}>
-                    <span>{workAreaName}</span>
-                    <ProgressBar label={workAreaName} percentage={Math.floor(completionRate * 100)} />
+                  <li key={routeName} className="region-status-route">
+                    <details>
+                      <summary>
+                        <span>{routeName}</span>
+                        <ProgressBar label={routeName} percentage={Math.floor(completionRate * 100)} />
+                      </summary>
+                      <ul className="region-status-route-work-areas">
+                        {workAreas.map(([workAreaName, workAreaCompletionRate]) => (
+                          <li key={workAreaName}>
+                            <span>{workAreaName}</span>
+                            <ProgressBar
+                              label={`${routeName} ${workAreaName}`}
+                              percentage={Math.floor(workAreaCompletionRate * 100)}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </li>
+                );
+              })
+            : sortedWorkAreaRouteProgress.map(([workAreaName, routeProgress]) => {
+                const completionRates = routeProgress.map(({ completionRate }) => completionRate);
+                const completionRate =
+                  completionRates.reduce((total, rate) => total + rate, 0) / completionRates.length;
+
+                return (
+                  <li key={workAreaName} className="region-status-work-area">
+                    <details>
+                      <summary>
+                        <span>{workAreaName}</span>
+                        <ProgressBar label={workAreaName} percentage={Math.floor(completionRate * 100)} />
+                      </summary>
+                      <ul className="region-status-work-area-routes">
+                        {routeProgress.map(({ routeName, completionRate: routeCompletionRate }) => (
+                          <li key={routeName}>
+                            <span>{routeName}</span>
+                            <ProgressBar
+                              label={`${workAreaName} ${routeName}`}
+                              percentage={Math.floor(routeCompletionRate * 100)}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   </li>
                 );
               })}

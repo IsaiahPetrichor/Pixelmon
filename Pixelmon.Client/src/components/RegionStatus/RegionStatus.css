@@ -4,6 +4,7 @@
 
 .region-status-detailed ul {
   list-style-type: none;
+  padding: 0;
 }
 
 .region-status-detailed li,
@@ -13,6 +14,77 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
+}
+
+.region-status-work-area {
+  display: block;
+}
+
+.region-status-route {
+  display: block;
+}
+
+.region-status-work-area details,
+.region-status-work-area summary,
+.region-status-route details,
+.region-status-route summary {
+  width: 100%;
+}
+
+.region-status-work-area summary,
+.region-status-route summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  list-style: disc;
+}
+
+summary > span {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+summary > span::before {
+  display: block;
+  content: '';
+  width: 0.3rem;
+  height: 0.3rem;
+  margin-right: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(0.5rem) rotate(-45deg);
+  transition: transform 0.2s ease;
+}
+
+details[open] > summary span::before {
+  transform: rotate(0) translateY(0.5rem) rotate(45deg);
+}
+
+.region-status-work-area-routes,
+.region-status-route-work-areas {
+  max-height: 20rem;
+  margin: 0;
+  border: 1px solid var(--border);
+  padding: 0 0 0 1.5rem;
+}
+
+.region-status-work-area-routes {
+  overflow-y: auto;
+}
+
+.region-status-route-work-areas li,
+.region-status-work-area-routes li {
+  padding: 0.25rem;
+}
+
+.region-status-route-list {
+  max-height: 30rem;
+  overflow-y: auto;
+}
+
+.region-status-route-list > li {
+  box-sizing: border-box;
 }
 
 .region-header {
