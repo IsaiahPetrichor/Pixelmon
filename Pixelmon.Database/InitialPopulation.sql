@@ -18,6 +18,7 @@ VALUES ('Terrain'),
 INSERT INTO workitemstatuses (status_name)
 VALUES ('New'), ('In Progress'), ('Complete');
 
+# Basic Kanto Routes
 INSERT INTO routes (region_id, route_name)
 VALUES (1, 'Route 1'),
     (1, 'Route 2'),
@@ -71,3 +72,41 @@ VALUES (1, 'Route 1'),
     (1, 'Victory Road'),
     (1, 'Viridian City'),
     (1, 'Viridian Forest');
+
+# Kanto - Sevii Islands
+INSERT INTO routes (region_id, route_name)
+VALUES (1, 'One Island'),
+    (1, 'Two Island'),
+    (1, 'Three Island'),
+    (1, 'Four Island'),
+    (1, 'Five Island'),
+    (1, 'Six Island'),
+    (1, 'Seven Island'),
+    (1, 'Kindle Road'),
+    (1, 'Treasure Beach'),
+    (1, 'Mt. Ember'),
+    (1, 'Cape Brink'),
+    (1, 'Three Isle Port'),
+    (1, 'Three Isle Path'),
+    (1, 'Bond Bridge'),
+    (1, 'Berry Forest'),
+    (1, 'Icefall Cave'),
+    (1, 'Five Isle Meadow'),
+    (1, 'Memorial Pillar'),
+    (1, 'Water Labyrinth'),
+    (1, 'Resort Gorgeous'),
+    (1, 'Rocket Warehouse'),
+    (1, 'Lost Cave'),
+    (1, 'Water Path'),
+    (1, 'Ruin Valley'),
+    (1, 'Dotted Hole'),
+    (1, 'Green Path'),
+    (1, 'Pattern Bush'),
+    (1, 'Outcast Island'),
+    (1, 'Altering Cave'),
+    (1, 'Trainer Tower'),
+    (1, 'Canyon Entrance'),
+    (1, 'Sevault Canyon'),
+    (1, 'Tanoby Ruins'),
+    (1, 'Navel Rock'),
+    (1, 'Birth Island');

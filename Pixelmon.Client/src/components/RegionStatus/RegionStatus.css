@@ -75,7 +75,9 @@ details[open] > summary span::before {
 
 .region-status-route-work-areas li,
 .region-status-work-area-routes li {
-  padding: 0.25rem;
+  padding: 0 0 0 0.3rem;
+  margin: 0 0.3rem;
+  border-left: 2px solid var(--border);
 }
 
 .region-status-route-list {

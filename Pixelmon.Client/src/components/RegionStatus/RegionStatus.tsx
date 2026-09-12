@@ -6,6 +6,8 @@ import { compareRouteNames } from '../../utils/routeSorting';
 type ProgressBarProps = {
   label: string;
   percentage: number;
+  fillColor?: string;
+  emptyColor?: string;
 };
 
 type WorkAreaRouteProgress = {
@@ -13,7 +15,7 @@ type WorkAreaRouteProgress = {
   completionRate: number;
 };
 
-function ProgressBar({ label, percentage }: ProgressBarProps) {
+function ProgressBar({ label, percentage, fillColor, emptyColor }: ProgressBarProps) {
   return (
     <div className="region-status-progress-bar">
       <div
@@ -24,7 +26,7 @@ function ProgressBar({ label, percentage }: ProgressBarProps) {
         aria-valuemax={100}
         aria-valuenow={percentage}
         style={{
-          backgroundImage: `linear-gradient(to right, var(--progress-full) ${percentage}%, var(--progress-empty) ${percentage ? percentage + 2 : 0}%)`,
+          backgroundImage: `linear-gradient(to right, var(${fillColor ? fillColor : '--progress-full'}) ${percentage}%, var(${emptyColor ? emptyColor : '--progress-empty'}) ${percentage ? percentage + 2 : 0}%)`,
         }}
       />
       <p>{percentage}%</p>
@@ -113,6 +115,8 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
                             <ProgressBar
                               label={`${routeName} ${workAreaName}`}
                               percentage={Math.floor(workAreaCompletionRate * 100)}
+                              fillColor="--accent-border"
+                              emptyColor="--accent-border2"
                             />
                           </li>
                         ))}
@@ -140,6 +144,8 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
                             <ProgressBar
                               label={`${workAreaName} ${routeName}`}
                               percentage={Math.floor(routeCompletionRate * 100)}
+                              fillColor="--accent-border"
+                              emptyColor="--accent-border2"
                             />
                           </li>
                         ))}
