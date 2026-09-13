@@ -43,6 +43,7 @@ function WorkItemList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
   const [assignedToFilter, setAssignedToFilter] = useState('all');
+  const [workAreaFilter, setWorkAreaFilter] = useState('all');
 
   function getSortValue(workItem: WorkItem, column: SortColumn): number | string {
     switch (column) {
@@ -76,8 +77,9 @@ function WorkItemList() {
   const filteredWorkItems = workItems.filter((workItem) => {
     const matchesStatus = statusFilter === 'all' || String(workItem.statusId) === statusFilter;
     const matchesAssignee = assignedToFilter === 'all' || String(workItem.assignedToId) === assignedToFilter;
+    const matchesWorkArea = workAreaFilter === 'all' || String(workItem.workAreaId) === workAreaFilter;
 
-    return matchesStatus && matchesAssignee;
+    return matchesStatus && matchesAssignee && matchesWorkArea;
   });
 
   const sortedWorkItems = [...filteredWorkItems].sort((left, right) => {
@@ -251,6 +253,23 @@ function WorkItemList() {
             {staff.map((member) => (
               <option key={member.id} value={member.id}>
                 {member.username}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Work Area
+          <select
+            value={workAreaFilter}
+            onChange={(event) => {
+              setWorkAreaFilter(event.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All work areas</option>
+            {workAreas.map((workArea) => (
+              <option key={workArea.id} value={workArea.id}>
+                {workArea.areaName}
               </option>
             ))}
           </select>
