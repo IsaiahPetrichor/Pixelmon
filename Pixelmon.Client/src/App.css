@@ -93,6 +93,23 @@ footer {
   font-size: 1rem;
 }
 
+.button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.button-icon p {
+  margin: 0;
+  padding: 0;
+  margin-left: 0.15rem;
+}
+
 @media (max-width: 650px) {
   header {
     flex-wrap: wrap;

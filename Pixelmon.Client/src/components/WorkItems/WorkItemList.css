@@ -1,14 +1,65 @@
 .work-item-list-toolbar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
+}
+
+.work-item-list-toolbar h3 {
+  margin: 0;
 }
 
 .work-item-list-filters {
   display: flex;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.work-item-list-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.work-item-list-add-filter-row {
+  flex-basis: 100%;
+}
+
+.work-item-list-operator {
+  transition:
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.work-item-list-operator:active {
+  transform: scale(0.92);
+}
+
+.work-item-list-operator svg {
+  animation: work-item-operator-change 180ms ease-out;
+}
+
+@keyframes work-item-operator-change {
+  from {
+    opacity: 0.4;
+    transform: scale(0.7) rotate(-90deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-item-list-operator,
+  .work-item-list-operator svg {
+    animation: none;
+    transition: none;
+  }
 }
 
 .work-item-list-filters label {
@@ -27,6 +78,10 @@
   color: var(--text);
   background: var(--accent-hover);
   font: inherit;
+}
+
+.work-item-list-filters button {
+  padding: 0.45rem 0.6rem;
 }
 
 .work-item-list {
@@ -118,16 +173,10 @@ tr > :not(:nth-child(3)):not(:nth-child(4)) {
 }
 
 .delete-work-item-button {
-  padding: 0.1rem 0.25rem;
-  border: 1px solid var(--accent);
-  border-radius: 2px;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
+  padding: 0.3rem 0.4rem;
 }
 
 .delete-work-item-button:hover {
-  color: #fff;
   background: var(--accent-border);
 }
 

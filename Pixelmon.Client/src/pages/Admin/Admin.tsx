@@ -19,7 +19,6 @@ function Admin({ onSignOut }: AdminProps) {
         </button>
       </div>
       <div className="admin-placeholder">
-        <h3>Work items</h3>
         <WorkItemList />
       </div>
     </section>

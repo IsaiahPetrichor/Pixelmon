@@ -9,7 +9,6 @@ function Regions() {
   const [status, setStatus] = useState<DetailedRegionStatus>();
 
   const apiBaseUrl = import.meta.env.VITE_API_URL;
-  //   const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
   useEffect(() => {
     const response = fetch(`${apiBaseUrl}/RegionStatus/GetDetailedStatus`).then((res) => {

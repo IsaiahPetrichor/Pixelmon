@@ -8,7 +8,8 @@ import type { WorkItemStatus } from '../../types/WorkItemStatus';
 import WorkItemPopover from './WorkItemPopover';
 
 import './WorkItemList.css';
-import { VscTrash } from 'react-icons/vsc';
+import { VscAdd, VscTrash } from 'react-icons/vsc';
+import { FaEquals, FaNotEqual } from 'react-icons/fa';
 import { authenticatedFetch } from '../../apiClient';
 import { compareRouteNames } from '../../utils/routeSorting';
 
@@ -17,6 +18,13 @@ const authTokenKey = import.meta.env.VITE_AUTH_STORAGE_KEY;
 const rowsPerPage = 50;
 type SortColumn = 'id' | 'region' | 'location' | 'title' | 'workArea' | 'assignedTo' | 'status';
 type SortDirection = 'ascending' | 'descending';
+type FilterField = 'id' | 'regionId' | 'routeId' | 'assignedToId' | 'workAreaId' | 'statusId';
+type WorkItemFilter = {
+  id: number;
+  field: FilterField;
+  value: string;
+  isNot: boolean;
+};
 
 const sortLabels: Record<SortColumn, string> = {
   id: 'Id',
@@ -27,6 +35,19 @@ const sortLabels: Record<SortColumn, string> = {
   assignedTo: 'Assigned To',
   status: 'Status',
 };
+
+const filterFieldLabels: Record<FilterField, string> = {
+  id: 'ID',
+  regionId: 'Region',
+  routeId: 'Route',
+  assignedToId: 'Assigned To',
+  workAreaId: 'Work Area',
+  statusId: 'Status',
+};
+
+function isFilterField(value: string): value is FilterField {
+  return value in filterFieldLabels;
+}
 
 function WorkItemList() {
   const [regions, setRegions] = useState<PokemonRegion[]>([]);
@@ -41,9 +62,31 @@ function WorkItemList() {
   const [sortColumn, setSortColumn] = useState<SortColumn>('id');
   const [sortDirection, setSortDirection] = useState<SortDirection>('ascending');
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [assignedToFilter, setAssignedToFilter] = useState('all');
-  const [workAreaFilter, setWorkAreaFilter] = useState('all');
+  const [filters, setFilters] = useState<WorkItemFilter[]>([]);
+  const [nextFilterId, setNextFilterId] = useState(0);
+
+  function getFilterOptions(field: FilterField) {
+    switch (field) {
+      case 'id':
+        return [...new Set(workItems.map((workItem) => workItem.id))]
+          .sort((firstId, secondId) => firstId - secondId)
+          .map((id) => ({ value: String(id), label: String(id) }));
+      case 'regionId':
+        return regions.map((region) => ({ value: String(region.id), label: region.regionName }));
+      case 'routeId':
+        return routes.map((route) => ({ value: String(route.id), label: route.routeName }));
+      case 'assignedToId':
+        return staff.map((member) => ({ value: String(member.id), label: member.username }));
+      case 'workAreaId':
+        return workAreas.map((workArea) => ({ value: String(workArea.id), label: workArea.areaName }));
+      case 'statusId':
+        return statuses.map((status) => ({ value: String(status.id), label: status.statusName }));
+    }
+  }
+
+  function getFilterValue(workItem: WorkItem, field: FilterField) {
+    return workItem[field];
+  }
 
   function getSortValue(workItem: WorkItem, column: SortColumn): number | string {
     switch (column) {
@@ -75,11 +118,12 @@ function WorkItemList() {
   }
 
   const filteredWorkItems = workItems.filter((workItem) => {
-    const matchesStatus = statusFilter === 'all' || String(workItem.statusId) === statusFilter;
-    const matchesAssignee = assignedToFilter === 'all' || String(workItem.assignedToId) === assignedToFilter;
-    const matchesWorkArea = workAreaFilter === 'all' || String(workItem.workAreaId) === workAreaFilter;
+    return filters.every((filter) => {
+      if (filter.value === '') return true;
 
-    return matchesStatus && matchesAssignee && matchesWorkArea;
+      const matchesValue = String(getFilterValue(workItem, filter.field)) === filter.value;
+      return filter.isNot ? !matchesValue : matchesValue;
+    });
   });
 
   const sortedWorkItems = [...filteredWorkItems].sort((left, right) => {
@@ -206,15 +250,17 @@ function WorkItemList() {
   return (
     <>
       <div className="work-item-list-toolbar">
+        <h3>Work Items</h3>
         <button
-          className="primary-button"
+          className="primary-button button-icon"
           type="button"
           onClick={() => {
             setSelectedWorkItem(null);
             setIsPopoverOpen(true);
           }}
         >
-          Create work item
+          <VscAdd />
+          <p>New Work Item</p>
         </button>
       </div>
       {deleteError && (
@@ -222,58 +268,101 @@ function WorkItemList() {
           {deleteError}
         </p>
       )}
-      <div className="work-item-list-filters">
-        <label>
-          Status
-          <select
-            value={statusFilter}
-            onChange={(event) => {
-              setStatusFilter(event.target.value);
-              setCurrentPage(1);
+      <div className="work-item-list-filters" aria-label="Work item filters">
+        {filters.map((filter) => (
+          <div className="work-item-list-filter" key={filter.id}>
+            <label>
+              Filter by
+              <select
+                aria-label="Filter field"
+                value={filter.field}
+                onChange={(event) => {
+                  const field = event.target.value;
+                  if (!isFilterField(field)) return;
+
+                  setFilters((currentFilters) =>
+                    currentFilters.map((currentFilter) =>
+                      currentFilter.id === filter.id ? { ...currentFilter, field, value: '' } : currentFilter,
+                    ),
+                  );
+                  setCurrentPage(1);
+                }}
+              >
+                {Object.entries(filterFieldLabels).map(([field, label]) => (
+                  <option key={field} value={field}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="secondary-button button-icon work-item-list-operator"
+              type="button"
+              aria-label={`Change ${filterFieldLabels[filter.field]} filter to ${filter.isNot ? 'equals' : 'does not equal'}`}
+              aria-pressed={filter.isNot}
+              title={filter.isNot ? 'Does not equal' : 'Equals'}
+              onClick={() => {
+                setFilters((currentFilters) =>
+                  currentFilters.map((currentFilter) =>
+                    currentFilter.id === filter.id ? { ...currentFilter, isNot: !currentFilter.isNot } : currentFilter,
+                  ),
+                );
+                setCurrentPage(1);
+              }}
+            >
+              {filter.isNot ? <FaNotEqual aria-hidden="true" /> : <FaEquals aria-hidden="true" />}
+            </button>
+            <select
+              aria-label={`Filter ${filterFieldLabels[filter.field]} value`}
+              value={filter.value}
+              onChange={(event) => {
+                setFilters((currentFilters) =>
+                  currentFilters.map((currentFilter) =>
+                    currentFilter.id === filter.id ? { ...currentFilter, value: event.target.value } : currentFilter,
+                  ),
+                );
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">Choose a value</option>
+              {getFilterOptions(filter.field).map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              className="secondary-button button-icon"
+              type="button"
+              aria-label={`Remove ${filterFieldLabels[filter.field]} filter`}
+              onClick={() => {
+                setFilters((currentFilters) =>
+                  currentFilters.filter((currentFilter) => currentFilter.id !== filter.id),
+                );
+                setCurrentPage(1);
+              }}
+            >
+              <VscTrash />
+            </button>
+          </div>
+        ))}
+        <div className={filters.length > 0 ? 'work-item-list-add-filter-row' : undefined}>
+          <button
+            aria-label="Add new filter"
+            className="secondary-button button-icon"
+            type="button"
+            onClick={() => {
+              setFilters((currentFilters) => [
+                ...currentFilters,
+                { id: nextFilterId, field: 'id', value: '', isNot: false },
+              ]);
+              setNextFilterId((currentId) => currentId + 1);
             }}
           >
-            <option value="all">All statuses</option>
-            {statuses.map((status) => (
-              <option key={status.id} value={status.id}>
-                {status.statusName}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Assigned To
-          <select
-            value={assignedToFilter}
-            onChange={(event) => {
-              setAssignedToFilter(event.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">Everyone</option>
-            {staff.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.username}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Work Area
-          <select
-            value={workAreaFilter}
-            onChange={(event) => {
-              setWorkAreaFilter(event.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All work areas</option>
-            {workAreas.map((workArea) => (
-              <option key={workArea.id} value={workArea.id}>
-                {workArea.areaName}
-              </option>
-            ))}
-          </select>
-        </label>
+            <VscAdd />
+            <p>Add filter</p>
+          </button>
+        </div>
       </div>
       <div className="work-item-list-container">
         <table className="work-item-list">
@@ -321,7 +410,7 @@ function WorkItemList() {
                     <td>{currentStatus ? currentStatus.statusName : 'UNKNOWN'}</td>
                     <td>
                       <button
-                        className="delete-work-item-button"
+                        className="secondary-button button-icon delete-work-item-button"
                         type="button"
                         aria-label={`Delete ${workItem.shortDescription}`}
                         onClick={(event) => {
@@ -329,7 +418,7 @@ function WorkItemList() {
                           deleteWorkItem(workItem);
                         }}
                       >
-                        <VscTrash style={{ height: '1.2rem', width: '1.2rem' }} />
+                        <VscTrash />
                       </button>
                     </td>
                   </tr>
