@@ -27,6 +27,7 @@ function Regions() {
       <ErrorBoundary fallback={<div>Something went wrong while loading the region status.</div>}>
         <Suspense fallback={<div>Loading region status...</div>}>
           <RegionStatusComponent regionName="Kanto" status={status?.Kanto ?? {}} />
+          <RegionStatusComponent regionName="Hoenn" status={status?.Hoenn ?? {}} />
         </Suspense>
       </ErrorBoundary>
     </>

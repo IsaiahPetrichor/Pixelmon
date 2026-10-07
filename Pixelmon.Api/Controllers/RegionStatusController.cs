@@ -33,27 +33,28 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
                 double routeCompletion = 0.00;
                 if (route.RegionId != region.Id) continue;
 
+                var routeWorkItems = workItems
+                    .Where(workItem => workItem.RegionId == region.Id && workItem.RouteId == route.Id)
+                    .ToArray();
+                if (routeWorkItems.Length == 0)
+                {
+                    allRoutes[route.RouteName] = 0.00;
+                    continue;
+                }
 
                 Dictionary<string, double> allWorkAreas = [];
                 // within each route seperate work items by Work Area
                 foreach (var workArea in workAreas)
                 {
                     // calculate the ratio of work items complete to incomplete for each area
-                    var completeItems = workItems.Count(workItem =>
-                        workItem.RegionId == region.Id &&
-                        workItem.RouteId == route.Id &&
-                        workItem.WorkAreaId == workArea.Id &&
-                        workItem.StatusId == 3);
-                    var totalItems = workItems.Count(workItem =>
-                        workItem.RegionId == region.Id &&
-                        workItem.RouteId == route.Id &&
-                        workItem.WorkAreaId == workArea.Id);
+                    var areaWorkItems = routeWorkItems.Where(workItem => workItem.WorkAreaId == workArea.Id).ToArray();
+                    var completeItems = areaWorkItems.Count(workItem => workItem.StatusId == 3);
+                    var totalItems = areaWorkItems.Length;
 
-                    double workAreaCompletion = totalItems > 0
-                        ? (double)completeItems / totalItems
-                        : 1.00;
-
-                    allWorkAreas[workArea.AreaName] = workAreaCompletion;
+                    if (totalItems > 0)
+                    {
+                        allWorkAreas[workArea.AreaName] = (double)completeItems / totalItems;
+                    }
                 }
                 // use work area ratios to calculate the average completion for the Route
                 routeCompletion = allWorkAreas.Count > 0
@@ -90,22 +91,25 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
             foreach (var route in routes.Where(route => route.RegionId == region.Id))
             {
                 Dictionary<string, double> routeStatus = [];
+                var routeWorkItems = workItems
+                    .Where(workItem => workItem.RegionId == region.Id && workItem.RouteId == route.Id)
+                    .ToArray();
+                if (routeWorkItems.Length == 0)
+                {
+                    regionStatus[route.RouteName] = routeStatus;
+                    continue;
+                }
 
                 foreach (var workArea in workAreas)
                 {
-                    var completeItems = workItems.Count(workItem =>
-                        workItem.RegionId == region.Id &&
-                        workItem.RouteId == route.Id &&
-                        workItem.WorkAreaId == workArea.Id &&
-                        workItem.StatusId == 3);
-                    var totalItems = workItems.Count(workItem =>
-                        workItem.RegionId == region.Id &&
-                        workItem.RouteId == route.Id &&
-                        workItem.WorkAreaId == workArea.Id);
+                    var areaWorkItems = routeWorkItems.Where(workItem => workItem.WorkAreaId == workArea.Id).ToArray();
+                    var completeItems = areaWorkItems.Count(workItem => workItem.StatusId == 3);
+                    var totalItems = areaWorkItems.Length;
 
-                    routeStatus[workArea.AreaName] = totalItems > 0
-                        ? (double)completeItems / totalItems
-                        : 1.00;
+                    if (totalItems > 0)
+                    {
+                        routeStatus[workArea.AreaName] = (double)completeItems / totalItems;
+                    }
                 }
 
                 regionStatus[route.RouteName] = routeStatus;

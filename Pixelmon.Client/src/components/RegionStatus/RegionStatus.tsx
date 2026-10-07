@@ -99,7 +99,9 @@ function RegionStatusComponent({ regionName, status }: RegionStatusComponentProp
             ? sortedRouteWorkAreaProgress.map(([routeName, workAreas]) => {
                 const completionRates = workAreas.map(([, completionRate]) => completionRate);
                 const completionRate =
-                  completionRates.reduce((total, rate) => total + rate, 0) / completionRates.length;
+                  completionRates.length > 0
+                    ? completionRates.reduce((total, rate) => total + rate, 0) / completionRates.length
+                    : 0;
 
                 return (
                   <li key={routeName} className="region-status-route">
