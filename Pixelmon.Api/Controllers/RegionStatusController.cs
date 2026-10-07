@@ -51,10 +51,9 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
                     var completeItems = areaWorkItems.Count(workItem => workItem.StatusId == 3);
                     var totalItems = areaWorkItems.Length;
 
-                    if (totalItems > 0)
-                    {
-                        allWorkAreas[workArea.AreaName] = (double)completeItems / totalItems;
-                    }
+                    allWorkAreas[workArea.AreaName] = totalItems > 0
+                        ? (double)completeItems / totalItems
+                        : 1.00;
                 }
                 // use work area ratios to calculate the average completion for the Route
                 routeCompletion = allWorkAreas.Count > 0
@@ -106,10 +105,9 @@ public class RegionStatusController(ILogger<RegionStatusController> logger, IDat
                     var completeItems = areaWorkItems.Count(workItem => workItem.StatusId == 3);
                     var totalItems = areaWorkItems.Length;
 
-                    if (totalItems > 0)
-                    {
-                        routeStatus[workArea.AreaName] = (double)completeItems / totalItems;
-                    }
+                    routeStatus[workArea.AreaName] = totalItems > 0
+                        ? (double)completeItems / totalItems
+                        : 1.00;
                 }
 
                 regionStatus[route.RouteName] = routeStatus;
